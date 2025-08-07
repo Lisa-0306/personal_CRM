@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人CRM管理系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .btn { @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer; }
+        .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700; }
+        .btn-success { @apply bg-green-600 text-white hover:bg-green-700; }
+        .btn-secondary { @apply bg-gray-500 text-white hover:bg-gray-600; }
+        .card { @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6; }
+        .relationship-node { @apply inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-2 mb-2 cursor-pointer hover:bg-blue-200; }
+        .project-tag { @apply inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2 mb-2; }
+        .priority-high { @apply bg-red-100 border-red-300 text-red-800; }
+        .priority-medium { @apply bg-yellow-100 border-yellow-300 text-yellow-800; }
+        .priority-low { @apply bg-gray-100 border-gray-300 text-gray-600; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- 侧边栏 - 宽敞舒适版本 -->
+        <div class="w-80 sidebar flex flex-col">
+            <!-- 顶部标题区域 - 更多留白 -->
+            <div class="px-8 py-10">
+                <h1 class="text-xl font-bold text-gray-900 mb-2">投资管理系统</h1>
+                <p class="text-sm text-gray-500">Personal CRM Platform</p>
+            </div>
+            
+            <!-- 导航区域 - 宽敞间距 -->
+            <nav class="flex-1 px-6 py-8">
+                <div class="space-y-6">
+                    <a href="#" onclick="showView('dashboard')" class="nav-item active" data-view="dashboard">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-5">
+                                <span class="text-xl">📊</span>
+                            </div>
+                            <div>
+                                <div class="text-base font-medium text-gray-900">工作台</div>
+                                <div class="text-sm text-gray-500 mt-0.5">Dashboard</div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" onclick="showView('contacts')" class="nav-item" data-view="contacts">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-5">
+                                <span class="text-xl">👥</span>
+                            </div>
+                            <div>
+                                <div class="text-base font-medium text-gray-700">联系人网络</div>
+                                <div class="text-sm text-gray-500 mt-0.5">Contacts</div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" onclick="showView('projects')" class="nav-item" data-view="projects">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-5">
+                                <span class="text-xl">🎯</span>
+                            </div>
+                            <div>
+                                <div class="text-base font-medium text-gray-700">项目管理</div>
+                                <div class="text-sm text-gray-500 mt-0.5">Projects</div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" onclick="showView('opportunities')" class="nav-item" data-view="opportunities">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-5">
+                                <span class="text-xl">💡</span>
+                            </div>
+                            <div>
+                                <div class="text-base font-medium text-gray-700">商业机会</div>
+                                <div class="text-sm text-gray-500 mt-0.5">Opportunities</div>
+                            </div>
+                        </div>
+                    </a>
+                    
+                    <a href="#" onclick="showView('schedule')" class="nav-item" data-view="schedule">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-5">
+                                <span class="text-xl">📅</span>
+                            </div>
+                            <div>
+                                <div class="text-base font-medium text-gray-700">日程安排</div>
+                                <div class="text-sm text-gray-500 mt-0.5">Schedule</div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </nav>
+            
+            <!-- 底部用户信息 - 更美观的布局 -->
+            <div class="px-6 py-6 border-t border-gray-100">
+                <div class="flex items-center p-4 bg-gray-50 rounded-xl">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mr-4">
+                        <span class="text-white text-lg font-medium">L</span>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-base font-semibold text-gray-900">Laura Zhao</div>
+                        <div class="text-sm text-gray-500">股权投资人</div>
+                    </div>
+                    <div class="w-6 h-6 text-gray-400">
+                        <span class="text-lg">⚙️</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <main class="flex-1 overflow-y-auto main-content">
+            <!-- 工作台视图 -->
+            <div id="dashboard-view" class="view-content p-8">
+                <div class="mb-8">
+                    <h1 class="page-title">工作台</h1>
+                    <p class="page-subtitle">基于关系网络的智能工作管理</p>
+                </div>
+
+                <!-- 核心数据卡片 -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                    <div class="notion-stat-card">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">👥</div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-900" id="totalContacts">156</div>
+                                <div class="text-sm text-gray-600">核心联系人</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notion-stat-card">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">🏢</div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-900" id="activeProjects">23</div>
+                                <div class="text-sm text-gray-600">进行中项目</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notion-stat-card">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">🌐</div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-900" id="relationships">89</div>
+                                <div class="text-sm text-gray-600">关联关系</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="notion-stat-card">
+                        <div class="flex items-center">
+                            <div class="text-2xl mr-3">⚡</div>
+                            <div>
+                                <div class="text-lg font-semibold text-gray-900" id="opportunities">12</div>
+                                <div class="text-sm text-gray-600">推荐机会</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 今日重点关系 -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-4">🎯 今日重点联系</h3>
+                        <div class="space-y-4" id="todayContacts">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-4">💡 基于关系的推荐</h3>
+                        <div class="space-y-4" id="relationshipRecommendations">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系人网络视图 -->
+            <div id="contacts-view" class="view-content hidden p-8">
+                <div class="mb-6">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="page-title">联系人网络</h1>
+                            <p class="page-subtitle">管理投资关系网络</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleContactView('table')" id="tableViewBtn" class="notion-btn notion-btn-primary text-sm">表格视图</button>
+                            <button onclick="toggleContactView('graph')" id="graphViewBtn" class="notion-btn notion-btn-secondary text-sm">关系图谱</button>
+                            <button onclick="addContact()" class="notion-btn notion-btn-primary">新建</button>
+                        </div>
+                    </div>
+                    <div class="mb-6">
+                        <input type="text" placeholder="搜索联系人或公司..." class="notion-input max-w-sm" id="contactSearch" oninput="searchContacts()">
+                    </div>
+                </div>
+
+                <!-- 表格视图 -->
+                <div id="contactTableView" class="notion-table">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="min-w-24">姓名</th>
+                                <th class="min-w-32">职位</th>
+                                <th class="min-w-32">所在机构</th>
+                                <th class="min-w-40">投资偏好</th>
+                                <th class="w-24">关系远近</th>
+                                <th class="min-w-24">推荐人</th>
+                                <th class="min-w-32">联系方式</th>
+                                <th class="w-20">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTable">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 关系图谱视图 -->
+                <div id="contactGraphView" class="hidden">
+                    <div class="notion-card">
+                        <div class="h-96 flex items-center justify-center bg-gray-50 rounded-lg">
+                            <div class="text-center">
+                                <span class="text-6xl mb-4 block">🌐</span>
+                                <p class="text-gray-600 text-lg mb-2">关系网络图谱</p>
+                                <p class="text-sm text-gray-500">可视化展示联系人之间的关联关系</p>
+                                <div class="mt-4 space-y-2">
+                                    <div class="flex items-center justify-center space-x-4">
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-blue-500 rounded-full mr-2"></div>
+                                            <span class="text-sm text-gray-600">投资人</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-green-500 rounded-full mr-2"></div>
+                                            <span class="text-sm text-gray-600">创业者</span>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="w-4 h-4 bg-purple-500 rounded-full mr-2"></div>
+                                            <span class="text-sm text-gray-600">合作伙伴</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- 项目管理视图 -->
+            <div id="projects-view" class="view-content hidden p-8">
+                <div class="mb-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="page-title">项目管理</h1>
+                            <p class="page-subtitle">投资项目跟踪管理</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" class="hidden" onchange="importExcelFile()">
+                            <button onclick="document.getElementById('excelFileInput').click()" class="notion-btn notion-btn-secondary">导入Excel</button>
+                            <button onclick="addProject()" class="notion-btn notion-btn-primary">新建</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                    <div class="notion-card">
+                        <h3 class="font-semibold text-gray-700 mb-3">📋 待接触</h3>
+                        <div class="space-y-3" id="pipeline-initial">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    <div class="notion-card">
+                        <h3 class="font-semibold text-gray-700 mb-3">🔍 尽职调查</h3>
+                        <div class="space-y-3" id="pipeline-dd">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    <div class="notion-card">
+                        <h3 class="font-semibold text-gray-700 mb-3">📊 投委会</h3>
+                        <div class="space-y-3" id="pipeline-ic">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                    <div class="notion-card">
+                        <h3 class="font-semibold text-gray-700 mb-3">✅ 已投资</h3>
+                        <div class="space-y-3" id="pipeline-invested">
+                            <!-- 动态生成 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商业机会视图 -->
+            <div id="opportunities-view" class="view-content hidden p-8">
+                <div class="mb-8">
+                    <h1 class="page-title">商业机会</h1>
+                    <p class="page-subtitle">项目跟踪与合作伙伴推荐</p>
+                </div>
+
+                <!-- 商业机会表格 -->
+                <div class="notion-table">
+                    <table class="w-full">
+                        <thead>
+                            <tr>
+                                <th class="min-w-32">项目名称</th>
+                                <th class="min-w-24">项目类型</th>
+                                <th class="min-w-40">项目信息</th>
+                                <th class="min-w-24">可预期收费</th>
+                                <th class="min-w-32">合作对象</th>
+                                <th class="min-w-32">可推荐合作伙伴</th>
+                                <th class="min-w-32">已推荐合作伙伴</th>
+                                <th class="min-w-28">合作意向跟进</th>
+                                <th class="w-24">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="opportunitiesTable">
+                            <!-- 动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+
+            <!-- 日程安排视图 -->
+            <div id="schedule-view" class="view-content hidden p-8">
+                <div class="mb-8">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h1 class="page-title">日程安排</h1>
+                            <p class="page-subtitle">智能日程管理</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="toggleScheduleView('day')" id="dayViewBtn" class="notion-btn notion-btn-primary text-sm">日视图</button>
+                            <button onclick="toggleScheduleView('week')" id="weekViewBtn" class="notion-btn notion-btn-secondary text-sm">周视图</button>
+                            <input 
+                                type="date" 
+                                id="scheduleDateSelector" 
+                                class="notion-input text-sm w-auto"
+                                onchange="changeScheduleDate(this.value)"
+                            >
+                            <button onclick="goToScheduleToday()" class="notion-btn notion-btn-ghost text-sm">今天</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 日视图 -->
+                <div id="dayScheduleView" class="notion-card">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-base font-medium text-gray-900" id="scheduleTimelineTitle">今日日程时间线</h3>
+                        <button onclick="saveScheduleChanges()" class="notion-btn notion-btn-primary">保存</button>
+                    </div>
+                    <div class="notion-table">
+                        <table class="w-full">
+                            <thead>
+                                <tr>
+                                    <th class="w-20">时间</th>
+                                    <th class="min-w-48">事项</th>
+                                    <th class="w-28">紧急程度</th>
+                                    <th class="min-w-48">备注信息</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTimelineTable">
+                                <!-- 时间线表格将在这里动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 周视图 -->
+                <div id="weekScheduleView" class="card hidden">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900" id="weekViewTitle">本周日程概览</h3>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="previousWeek()" class="btn-secondary text-sm">← 上周</button>
+                            <button onclick="nextWeek()" class="btn-secondary text-sm">下周 →</button>
+                            <button onclick="saveScheduleChanges()" class="btn-success text-sm">💾 保存更改</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 border-b-2 border-gray-200">
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 w-16">时间</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周一</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周二</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周三</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周四</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周五</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周六</th>
+                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周日</th>
+                                </tr>
+                            </thead>
+                            <tbody id="weekScheduleTable">
+                                <!-- 周视图表格将在这里动态生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 明日提醒事项 -->
+                <div class="card bg-yellow-50 border-yellow-200 mt-6">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <span class="text-xl">💡</span>
+                        <h3 class="text-lg font-semibold text-yellow-800">明日提醒事项</h3>
+                    </div>
+                    <textarea 
+                        id="tomorrowReminderCRM" 
+                        class="w-full p-3 border border-yellow-300 rounded-lg bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none" 
+                        rows="3" 
+                        placeholder="输入明天需要注意或准备的重要事项..."
+                        onblur="saveTomorrowReminderCRM()"
+                    ></textarea>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 示例数据
+        const contacts = [
+            {
+                id: 1, name: '张总', company: '红杉资本中国', position: '管理合伙人',
+                phone: '138-0013-8888', email: 'zhang@sequoiacap.com',
+                industry: ['科技', 'AI', '新能源'], relationshipStrength: 95,
+                projects: ['AI项目A', '新能源项目B'], connections: [2, 3, 7],
+                lastContact: '2024-01-20', priority: 'high',
+                investmentPreference: ['AI', '新能源', 'A轮', 'B轮'],
+                relationship: 'close',
+                referrer: '李总',
+                contactInfo: '138-0013-8888, zhang@sequoiacap.com'
+            },
+            {
+                id: 2, name: '李总', company: '腾讯投资', position: '投资总监',
+                phone: '139-0013-9999', email: 'li@tencent.com',
+                industry: ['互联网', '游戏', '社交'], relationshipStrength: 88,
+                projects: ['区块链项目C'], connections: [1, 4, 5],
+                lastContact: '2024-01-18', priority: 'high',
+                investmentPreference: ['互联网', '游戏', 'B轮', 'C轮'],
+                relationship: 'close',
+                referrer: '王总',
+                contactInfo: '139-0013-9999, li@tencent.com'
+            },
+            {
+                id: 3, name: '王总', company: '经纬创投', position: '合伙人',
+                phone: '137-0013-7777', email: 'wang@matrix.com',
+                industry: ['企业服务', '教育', '医疗'], relationshipStrength: 82,
+                projects: ['企业服务项目D'], connections: [1, 6, 8],
+                lastContact: '2024-01-15', priority: 'medium',
+                investmentPreference: ['企业服务', '教育', 'A轮', 'B轮'],
+                relationship: 'medium',
+                referrer: '张总',
+                contactInfo: '137-0013-7777, wang@matrix.com'
+            },
+            {
+                id: 4, name: '刘总', company: '君联资本', position: '董事总经理',
+                phone: '136-0013-6666', email: 'liu@legend.com',
+                industry: ['医疗健康', '消费'], relationshipStrength: 75,
+                projects: ['医疗项目E'], connections: [2, 5],
+                lastContact: '2024-01-12', priority: 'medium',
+                investmentPreference: ['医疗健康', '消费', '天使轮', 'A轮'],
+                relationship: 'medium',
+                referrer: '李总',
+                contactInfo: '136-0013-6666, liu@legend.com'
+            },
+            {
+                id: 5, name: '陈总', company: '华兴资本', position: '执行董事',
+                phone: '135-0013-5555', email: 'chen@huaxing.com',
+                industry: ['TMT', '新消费'], relationshipStrength: 70,
+                projects: [], connections: [2, 4],
+                lastContact: '2024-01-10', priority: 'low',
+                investmentPreference: ['TMT', '新消费', 'B轮', 'C轮'],
+                relationship: 'distant',
+                referrer: '刘总',
+                contactInfo: '135-0013-5555, chen@huaxing.com'
+            }
+        ];
+
+        const projects = [
+            {
+                id: 1, name: 'AI项目A', stage: 'dd', priority: 'high',
+                contacts: [1], industry: '人工智能', round: 'A轮',
+                amount: '5000万', description: '计算机视觉AI平台'
+            },
+            {
+                id: 2, name: '新能源项目B', stage: 'ic', priority: 'high',
+                contacts: [1], industry: '新能源', round: 'B轮',
+                amount: '1.2亿', description: '智能充电桩网络'
+            },
+            {
+                id: 3, name: '区块链项目C', stage: 'initial', priority: 'medium',
+                contacts: [2], industry: '区块链', round: '天使轮',
+                amount: '800万', description: 'DeFi金融服务平台'
+            }
+        ];
+
+        // 导航功能
+        function showView(viewName) {
+            // 隐藏所有视图
+            document.querySelectorAll('.view-content').forEach(view => {
+                view.classList.add('hidden');
+            });
+            
+            // 显示选中的视图
+            document.getElementById(viewName + '-view').classList.remove('hidden');
+            
+            // 更新导航状态
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewName}"]`).classList.add('active');
+
+            // 加载对应数据
+            if (viewName === 'contacts') {
+                toggleContactView('table'); // 默认显示表格视图
+            }
+            if (viewName === 'projects') loadProjects();
+            if (viewName === 'dashboard') loadDashboard();
+            if (viewName === 'opportunities') loadOpportunities();
+            if (viewName === 'schedule') {
+                initializeScheduleSelector();
+                toggleScheduleView('day'); // 默认显示日视图
+            }
+        }
+
+        // 加载工作台
+        function loadDashboard() {
+            loadTodayContacts();
+            loadRelationshipRecommendations();
+        }
+
+        // 加载今日重点联系人
+        function loadTodayContacts() {
+            const container = document.getElementById('todayContacts');
+            const todayContacts = contacts.filter(c => c.priority === 'high').slice(0, 3);
+            
+            container.innerHTML = todayContacts.map(contact => `
+                <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                            ${contact.name[0]}
+                        </div>
+                        <div>
+                            <p class="font-medium text-gray-900">${contact.name}</p>
+                            <p class="text-sm text-gray-600">${contact.company}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full">
+                            关系强度: ${contact.relationshipStrength}%
+                        </span>
+                        <button class="btn btn-primary text-xs" onclick="contactPerson(${contact.id})">联系</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 加载关系推荐
+        function loadRelationshipRecommendations() {
+            const container = document.getElementById('relationshipRecommendations');
+            
+            container.innerHTML = `
+                <div class="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <p class="font-medium text-blue-900">💡 张总 → 新项目推荐</p>
+                    <p class="text-sm text-blue-700 mt-1">基于共同投资历史，张总可能对AI医疗项目感兴趣</p>
+                    <button class="btn btn-primary text-xs mt-2">查看详情</button>
+                </div>
+                <div class="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <p class="font-medium text-green-900">🤝 李总 ↔ 王总 连接</p>
+                    <p class="text-sm text-green-700 mt-1">可以介绍李总和王总认识，互补投资领域</p>
+                    <button class="btn btn-success text-xs mt-2">安排介绍</button>
+                </div>
+                <div class="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <p class="font-medium text-purple-900">⚡ 关系升温建议</p>
+                    <p class="text-sm text-purple-700 mt-1">陈总已经10天未联系，建议主动沟通</p>
+                    <button class="btn btn-secondary text-xs mt-2">发起联系</button>
+                </div>
+            `;
+        }
+
+        // 加载联系人列表
+        function loadContacts() {
+            const container = document.getElementById('contactsList');
+            
+            container.innerHTML = contacts.map(contact => `
+                <div class="contact-item p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="showContactDetails(${contact.id})">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-4">
+                                ${contact.name[0]}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">${contact.name}</h3>
+                                <p class="text-sm text-gray-600">${contact.position} · ${contact.company}</p>
+                                <div class="flex items-center mt-2">
+                                    ${contact.industry.map(ind => `<span class="relationship-node">${ind}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex items-center mb-2">
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    ${contact.relationshipStrength}%
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500">最后联系: ${contact.lastContact}</p>
+                            <p class="text-xs text-gray-500">关联: ${contact.connections.length}人</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 显示联系人详情
+        function showContactDetails(contactId) {
+            const contact = contacts.find(c => c.id === contactId);
+            const connections = contacts.filter(c => contact.connections.includes(c.id));
+            
+            const panel = document.getElementById('relationshipPanel');
+            panel.innerHTML = `
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">${contact.name} - 关系网络</h3>
+                
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-700 mb-2">🎯 基本信息</h4>
+                    <div class="space-y-1 text-sm">
+                        <p><span class="text-gray-500">公司:</span> ${contact.company}</p>
+                        <p><span class="text-gray-500">职位:</span> ${contact.position}</p>
+                        <p><span class="text-gray-500">关系强度:</span> ${contact.relationshipStrength}%</p>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-700 mb-2">🌐 直接关系 (${connections.length}人)</h4>
+                    <div class="space-y-2">
+                        ${connections.map(conn => `
+                            <div class="flex items-center justify-between p-2 bg-gray-50 rounded">
+                                <span class="text-sm">${conn.name} - ${conn.company}</span>
+                                <span class="text-xs text-blue-600 cursor-pointer" onclick="showContactDetails(${conn.id})">查看</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <h4 class="font-medium text-gray-700 mb-2">🏢 相关项目</h4>
+                    <div class="space-y-2">
+                        ${contact.projects.map(project => `
+                            <span class="project-tag">${project}</span>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <button class="btn btn-primary w-full text-sm" onclick="contactPerson(${contact.id})">发起联系</button>
+                    <button class="btn btn-secondary w-full text-sm" onclick="scheduleWithContact(${contact.id})">安排会议</button>
+                </div>
+            `;
+        }
+
+        // 加载项目
+        function loadProjects() {
+            const stages = {
+                'initial': document.getElementById('pipeline-initial'),
+                'dd': document.getElementById('pipeline-dd'),
+                'ic': document.getElementById('pipeline-ic'),
+                'invested': document.getElementById('pipeline-invested')
+            };
+
+            // 清空所有阶段
+            Object.values(stages).forEach(stage => stage.innerHTML = '');
+
+            projects.forEach(project => {
+                const container = stages[project.stage];
+                if (container) {
+                    container.innerHTML += `
+                        <div class="project-card p-3 border border-gray-200 rounded-lg hover:shadow-sm cursor-pointer priority-${project.priority}">
+                            <h4 class="font-medium text-gray-900 mb-2">${project.name}</h4>
+                            <p class="text-xs text-gray-600 mb-2">${project.description}</p>
+                            <div class="flex justify-between items-center text-xs">
+                                <span class="bg-gray-100 px-2 py-1 rounded">${project.round}</span>
+                                <span class="font-medium text-gray-700">${project.amount}</span>
+                            </div>
+                            <div class="mt-2">
+                                ${project.contacts.map(contactId => {
+                                    const contact = contacts.find(c => c.id === contactId);
+                                    return `<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded mr-1">${contact?.name}</span>`;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        // 搜索联系人
+        function searchContacts() {
+            const searchTerm = document.getElementById('contactSearch').value.toLowerCase();
+            const filteredContacts = contacts.filter(contact => 
+                contact.name.toLowerCase().includes(searchTerm) ||
+                contact.company.toLowerCase().includes(searchTerm) ||
+                contact.industry.some(ind => ind.toLowerCase().includes(searchTerm))
+            );
+            
+            const container = document.getElementById('contactsList');
+            container.innerHTML = filteredContacts.map(contact => `
+                <div class="contact-item p-4 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer" onclick="showContactDetails(${contact.id})">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-4">
+                                ${contact.name[0]}
+                            </div>
+                            <div>
+                                <h3 class="font-semibold text-gray-900">${contact.name}</h3>
+                                <p class="text-sm text-gray-600">${contact.position} · ${contact.company}</p>
+                                <div class="flex items-center mt-2">
+                                    ${contact.industry.map(ind => `<span class="relationship-node">${ind}</span>`).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex items-center mb-2">
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                                    ${contact.relationshipStrength}%
+                                </span>
+                            </div>
+                            <p class="text-xs text-gray-500">最后联系: ${contact.lastContact}</p>
+                            <p class="text-xs text-gray-500">关联: ${contact.connections.length}人</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 日程管理相关变量和数据
+        let selectedScheduleDate = new Date();
+        let currentScheduleView = 'day'; // 'day' 或 'week'
+        let currentWeekOffset = 0; // 周视图偏移量
+        
+        // 商业机会数据
+        const opportunitiesData = [
+            {
+                id: 1, name: 'AI智能客服项目', type: '人工智能', 
+                info: '基于大模型的智能客服解决方案，已有10+企业客户',
+                expectedFee: '200万', cooperationTarget: '红杉资本',
+                recommendedPartners: ['张总-红杉资本', '李总-腾讯投资'],
+                contactedPartners: ['张总-红杉资本'], 
+                followUp: '张总表示感兴趣，约定下周详谈',
+                status: 'active'
+            },
+            {
+                id: 2, name: '新能源充电桩网络', type: '新能源',
+                info: '覆盖一线城市的智能充电桩网络，用户量50万+',
+                expectedFee: '500万', cooperationTarget: '经纬创投',
+                recommendedPartners: ['王总-经纬创投', '刘总-君联资本'],
+                contactedPartners: [], 
+                followUp: '待联系推荐投资人',
+                status: 'pending'
+            },
+            {
+                id: 3, name: '区块链供应链金融', type: '区块链',
+                info: '基于区块链的供应链金融平台，已与3家银行合作',
+                expectedFee: '150万', cooperationTarget: '华兴资本',
+                recommendedPartners: ['陈总-华兴资本'],
+                contactedPartners: ['陈总-华兴资本'], 
+                followUp: '陈总建议优化商业模式后再议',
+                status: 'follow_up'
+            }
+        ];
+        
+        const scheduleData = [
+            {
+                id: 1, title: '团队晨会', startTime: '09:00', endTime: '09:30',
+                location: '会议室A', priority: 'medium', date: '2024-01-22',
+                contactId: null, type: 'meeting', notes: '讨论本周工作计划'
+            },
+            {
+                id: 2, title: '投资人会面 - 张总', startTime: '10:00', endTime: '11:30',
+                location: '红杉资本办公室', priority: 'high', date: '2024-01-23',
+                contactId: 1, type: 'meeting', notes: '准备项目BP和财务模型'
+            },
+            {
+                id: 3, title: '项目进展汇报 - 老板', startTime: '15:30', endTime: '16:30',
+                location: 'CEO办公室', priority: 'urgent', date: '2024-01-23',
+                contactId: null, type: 'meeting', notes: '汇报当前项目进展'
+            }
+        ];
+
+        // 商业机会分析
+        function analyzeOpportunity() {
+            const projectName = document.getElementById('projectName').value;
+            const industry = document.getElementById('projectIndustry').value;
+            const round = document.getElementById('projectRound').value;
+            const amount = document.getElementById('projectAmount').value;
+            const description = document.getElementById('projectDescription').value;
+
+            if (!projectName || !industry || !round) {
+                alert('请填写完整的项目信息');
+                return;
+            }
+
+            // 基于行业和轮次匹配投资人
+            const recommendations = contacts.filter(contact => {
+                // 检查行业匹配
+                const industryMatch = contact.industry.some(ind => 
+                    ind.includes(industry) || industry.includes(ind)
+                );
+                
+                // 检查投资偏好（如果有的话）
+                const roundMatch = contact.investmentPreference ? 
+                    contact.investmentPreference.includes(round) : true;
+                
+                return industryMatch || roundMatch;
+            }).map(contact => {
+                // 计算匹配分数
+                let score = 0;
+                if (contact.industry.some(ind => ind.includes(industry))) score += 40;
+                if (contact.investmentPreference && contact.investmentPreference.includes(round)) score += 30;
+                score += contact.relationshipStrength * 0.3; // 关系强度影响
+                
+                return { ...contact, matchScore: Math.min(100, Math.round(score)) };
+            }).sort((a, b) => b.matchScore - a.matchScore);
+
+            displayOpportunityRecommendations(recommendations, { projectName, industry, round, amount });
+        }
+
+        // 显示商业机会推荐
+        function displayOpportunityRecommendations(recommendations, projectInfo) {
+            const container = document.getElementById('opportunityRecommendations');
+            
+            if (recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <span class="text-4xl block mb-2">😔</span>
+                        <p>暂未找到匹配的投资人，建议扩展关系网络</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = recommendations.slice(0, 5).map(contact => `
+                <div class="recommendation-item p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold mr-3">
+                                ${contact.name[0]}
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">${contact.name}</h4>
+                                <p class="text-sm text-gray-600">${contact.company}</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-lg font-bold text-green-600">${contact.matchScore}%</span>
+                            <p class="text-xs text-gray-500">匹配度</p>
+                        </div>
+                    </div>
+                    <div class="text-sm text-gray-700 mb-3">
+                        <p><strong>匹配原因:</strong></p>
+                        <ul class="list-disc list-inside text-xs space-y-1 mt-1">
+                            ${contact.industry.some(ind => ind.includes(projectInfo.industry)) ? 
+                                `<li>专注${projectInfo.industry}行业投资</li>` : ''}
+                            ${contact.investmentPreference && contact.investmentPreference.includes(projectInfo.round) ? 
+                                `<li>偏好${projectInfo.round}投资</li>` : ''}
+                            <li>关系强度: ${contact.relationshipStrength}%</li>
+                        </ul>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="scheduleCallWithContact(${contact.id}, '${projectInfo.projectName}')" 
+                                class="btn btn-primary text-xs flex-1">📞 安排通话</button>
+                        <button onclick="showContactDetails(${contact.id})" 
+                                class="btn btn-secondary text-xs flex-1">👤 查看详情</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 安排与联系人的通话
+        function scheduleCallWithContact(contactId, projectName) {
+            const contact = contacts.find(c => c.id === contactId);
+            if (contact) {
+                // 自动切换到日程视图并创建新的通话安排
+                showView('schedule');
+                
+                // 创建新的日程项
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                const tomorrowStr = formatDateToString(tomorrow);
+                
+                const newSchedule = {
+                    id: scheduleData.length + 1,
+                    title: `项目讨论 - ${contact.name}`,
+                    startTime: '14:00',
+                    endTime: '15:00',
+                    location: '电话会议',
+                    priority: 'high',
+                    date: tomorrowStr,
+                    contactId: contactId,
+                    type: 'call',
+                    notes: `讨论${projectName}项目投资机会`
+                };
+                
+                scheduleData.push(newSchedule);
+                
+                // 切换到明天的日期并刷新时间线
+                selectedScheduleDate = tomorrow;
+                document.getElementById('scheduleDateSelector').value = tomorrowStr;
+                updateScheduleTimelineTitle();
+                loadScheduleTimeline();
+                
+                alert(`已为您安排明天14:00与${contact.name}的项目讨论通话`);
+            }
+        }
+
+        // 日期格式化函数
+        function formatDateToString(date) {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // 格式化日期显示
+        function formatScheduleDateDisplay(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const weekdays = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+            const weekday = weekdays[date.getDay()];
+            
+            const today = new Date();
+            if (formatDateToString(date) === formatDateToString(today)) {
+                return '今日日程时间线';
+            } else {
+                return `${year}年${month}月${day}日（${weekday}）日程时间线`;
+            }
+        }
+
+        // 切换日程日期
+        function changeScheduleDate(dateString) {
+            selectedScheduleDate = new Date(dateString);
+            updateScheduleTimelineTitle();
+            loadScheduleTimeline();
+        }
+
+        // 回到今天
+        function goToScheduleToday() {
+            selectedScheduleDate = new Date();
+            document.getElementById('scheduleDateSelector').value = formatDateToString(selectedScheduleDate);
+            updateScheduleTimelineTitle();
+            loadScheduleTimeline();
+        }
+
+        // 更新时间线标题
+        function updateScheduleTimelineTitle() {
+            document.getElementById('scheduleTimelineTitle').textContent = formatScheduleDateDisplay(selectedScheduleDate);
+        }
+
+        // 加载日程时间线
+        function loadScheduleTimeline() {
+            const container = document.getElementById('scheduleTimelineTable');
+            const selectedDateStr = formatDateToString(selectedScheduleDate);
+            const daySchedules = scheduleData.filter(s => s.date === selectedDateStr);
+            
+            // 生成8:00-20:00的时间段
+            const timeSlots = [];
+            for (let hour = 8; hour <= 20; hour++) {
+                timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+            }
+            
+            container.innerHTML = timeSlots.map(timeSlot => {
+                const hour = parseInt(timeSlot.split(':')[0]);
+                const scheduleInSlot = daySchedules.find(s => {
+                    const startHour = parseInt(s.startTime.split(':')[0]);
+                    return startHour === hour;
+                });
+                
+                return `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td class="py-3 px-3 text-sm font-medium text-gray-600 bg-gray-50">${timeSlot}</td>
+                        <td class="py-3 px-3">
+                            <input type="text" 
+                                   value="${scheduleInSlot ? scheduleInSlot.title : ''}" 
+                                   placeholder="点击输入事项"
+                                   class="notion-input text-sm"
+                                   data-time="${timeSlot}" 
+                                   data-field="title"
+                                   onchange="updateScheduleField(this)">
+                        </td>
+                        <td class="py-3 px-3">
+                            <select class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm priority-${scheduleInSlot ? scheduleInSlot.priority : 'medium'}"
+                                    data-time="${timeSlot}" 
+                                    data-field="priority"
+                                    onchange="updateScheduleField(this)">
+                                <option value="low" ${scheduleInSlot && scheduleInSlot.priority === 'low' ? 'selected' : ''}>低</option>
+                                <option value="medium" ${scheduleInSlot && scheduleInSlot.priority === 'medium' ? 'selected' : ''}>中</option>
+                                <option value="high" ${scheduleInSlot && scheduleInSlot.priority === 'high' ? 'selected' : ''}>高</option>
+                                <option value="urgent" ${scheduleInSlot && scheduleInSlot.priority === 'urgent' ? 'selected' : ''}>紧急</option>
+                            </select>
+                        </td>
+                        <td class="py-3 px-3">
+                            <textarea class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm resize-none" 
+                                      rows="2"
+                                      placeholder="备注信息"
+                                      data-time="${timeSlot}" 
+                                      data-field="notes"
+                                      onchange="updateScheduleField(this)">${scheduleInSlot ? (scheduleInSlot.notes || '') : ''}</textarea>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            
+            // 加载明日提醒事项
+            loadTomorrowReminderCRM();
+        }
+
+        // 更新日程字段
+        function updateScheduleField(element) {
+            const time = element.dataset.time;
+            const field = element.dataset.field;
+            const value = element.value;
+            const selectedDateStr = formatDateToString(selectedScheduleDate);
+            
+            if (!value.trim() && field === 'title') {
+                // 如果标题为空，删除该时间段的日程
+                const index = scheduleData.findIndex(s => s.date === selectedDateStr && s.startTime === time);
+                if (index > -1) {
+                    scheduleData.splice(index, 1);
+                }
+                return;
+            }
+            
+            if (!value.trim()) return; // 其他字段为空则不处理
+            
+            // 查找对应时间段的日程
+            let schedule = scheduleData.find(s => s.date === selectedDateStr && s.startTime === time);
+            
+            if (!schedule && field === 'title') {
+                // 如果不存在日程且输入了标题，创建新日程
+                const endHour = (parseInt(time.split(':')[0]) + 1).toString().padStart(2, '0') + ':00';
+                schedule = {
+                    id: scheduleData.length + 1,
+                    title: '',
+                    startTime: time,
+                    endTime: endHour,
+                    location: '',
+                    type: 'other',
+                    priority: 'medium',
+                    date: selectedDateStr,
+                    contactId: null,
+                    notes: ''
+                };
+                scheduleData.push(schedule);
+            }
+            
+            if (schedule) {
+                // 更新对应字段
+                schedule[field] = value;
+                
+                // 更新优先级样式
+                if (field === 'priority') {
+                    element.className = element.className.replace(/priority-\w+/, `priority-${value}`);
+                }
+            }
+        }
+
+        // 保存日程更改
+        function saveScheduleChanges() {
+            alert('日程更改已保存！');
+        }
+
+        // 加载明日提醒事项
+        function loadTomorrowReminderCRM() {
+            const saved = localStorage.getItem('tomorrow-reminder-crm');
+            if (saved) {
+                document.getElementById('tomorrowReminderCRM').value = saved;
+            }
+        }
+
+        // 保存明日提醒事项
+        function saveTomorrowReminderCRM() {
+            const value = document.getElementById('tomorrowReminderCRM').value;
+            localStorage.setItem('tomorrow-reminder-crm', value);
+        }
+
+        // 初始化日程选择器
+        function initializeScheduleSelector() {
+            const today = new Date();
+            selectedScheduleDate = today;
+            document.getElementById('scheduleDateSelector').value = formatDateToString(today);
+            updateScheduleTimelineTitle();
+        }
+
+        // 联系人视图切换
+        function toggleContactView(viewType) {
+            if (viewType === 'table') {
+                document.getElementById('contactTableView').classList.remove('hidden');
+                document.getElementById('contactGraphView').classList.add('hidden');
+                document.getElementById('tableViewBtn').className = 'btn-primary text-sm';
+                document.getElementById('graphViewBtn').className = 'btn-secondary text-sm';
+                loadContactsTable();
+            } else {
+                document.getElementById('contactTableView').classList.add('hidden');
+                document.getElementById('contactGraphView').classList.remove('hidden');
+                document.getElementById('tableViewBtn').className = 'btn-secondary text-sm';
+                document.getElementById('graphViewBtn').className = 'btn-primary text-sm';
+            }
+        }
+
+        // 加载联系人表格
+        function loadContactsTable() {
+            const container = document.getElementById('contactsTable');
+            
+            container.innerHTML = contacts.map((contact, index) => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4 font-medium text-gray-900">${contact.name}</td>
+                    <td class="py-3 px-4 text-gray-700">${contact.position}</td>
+                    <td class="py-3 px-4 text-gray-700">${contact.company}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${contact.investmentPreference.map(pref => `
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${pref}</span>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded-full text-xs ${
+                            contact.relationship === 'close' ? 'bg-green-100 text-green-800' :
+                            contact.relationship === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-gray-100 text-gray-800'
+                        }">
+                            ${contact.relationship === 'close' ? '密切' : 
+                              contact.relationship === 'medium' ? '一般' : '疏远'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-gray-700">${contact.referrer}</td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${contact.contactInfo}</td>
+                    <td class="py-3 px-4">
+                        <div class="flex flex-col space-y-1">
+                            <button onclick="editContact(${contact.id})" class="btn btn-secondary text-xs">编辑</button>
+                            <button onclick="contactPerson(${contact.id})" class="btn btn-primary text-xs">联系</button>
+                        </div>
+                    </td>
+                </tr>
+                ${index === contacts.length - 1 ? `
+                <tr class="border-b border-gray-100">
+                    <td colspan="8" class="py-3 px-4 text-center">
+                        <button onclick="addContact()" class="btn btn-primary text-sm w-full">
+                            + 添加新联系人
+                        </button>
+                    </td>
+                </tr>
+                ` : ''}
+            `).join('');
+        }
+
+        // 显示联系人输入模态框
+        function showContactInputModal() {
+            document.getElementById('contactInputModal').classList.remove('hidden');
+            document.getElementById('contactInputModal').classList.add('flex');
+            // 清空表单
+            document.getElementById('contactTextInput').value = '';
+            document.getElementById('contactImageInput').value = '';
+            clearParsedFields();
+        }
+
+        // 隐藏联系人输入模态框
+        function hideContactInputModal() {
+            document.getElementById('contactInputModal').classList.add('hidden');
+            document.getElementById('contactInputModal').classList.remove('flex');
+        }
+
+        // 清空解析字段
+        function clearParsedFields() {
+            document.getElementById('parsedName').value = '';
+            document.getElementById('parsedPosition').value = '';
+            document.getElementById('parsedCompany').value = '';
+            document.getElementById('parsedPreference').value = '';
+            document.getElementById('parsedRelationship').value = 'medium';
+            document.getElementById('parsedReferrer').value = '';
+            document.getElementById('parsedContact').value = '';
+        }
+
+        // 智能解析联系人信息
+        function parseContactInfo() {
+            const textInput = document.getElementById('contactTextInput').value;
+            if (!textInput.trim()) {
+                alert('请输入联系人信息');
+                return;
+            }
+
+            // 简单的文本解析逻辑（实际项目中可以使用AI API）
+            const text = textInput.toLowerCase();
+            
+            // 提取姓名（通常在开头）
+            const nameMatch = textInput.match(/^([^，,\s]+)/);
+            if (nameMatch) {
+                document.getElementById('parsedName').value = nameMatch[1];
+            }
+
+            // 提取公司名称
+            const companyPatterns = [
+                /([^，,\s]*资本[^，,\s]*)/,
+                /([^，,\s]*投资[^，,\s]*)/,
+                /([^，,\s]*基金[^，,\s]*)/,
+                /([^，,\s]*创投[^，,\s]*)/
+            ];
+            for (let pattern of companyPatterns) {
+                const match = textInput.match(pattern);
+                if (match) {
+                    document.getElementById('parsedCompany').value = match[1];
+                    break;
+                }
+            }
+
+            // 提取职位
+            const positionPatterns = [
+                /(管理合伙人|合伙人|投资总监|董事总经理|执行董事|VP|总裁|CEO|CTO|CFO)/
+            ];
+            for (let pattern of positionPatterns) {
+                const match = textInput.match(pattern);
+                if (match) {
+                    document.getElementById('parsedPosition').value = match[1];
+                    break;
+                }
+            }
+
+            // 提取投资偏好
+            const industries = ['AI', '人工智能', '区块链', '新能源', '医疗', '教育', '企业服务', '消费', '互联网', '游戏'];
+            const rounds = ['天使轮', 'Pre-A', 'A轮', 'B轮', 'C轮'];
+            const foundPrefs = [];
+            
+            industries.forEach(industry => {
+                if (text.includes(industry.toLowerCase()) || textInput.includes(industry)) {
+                    foundPrefs.push(industry);
+                }
+            });
+            
+            rounds.forEach(round => {
+                if (textInput.includes(round)) {
+                    foundPrefs.push(round);
+                }
+            });
+            
+            document.getElementById('parsedPreference').value = foundPrefs.join(', ');
+
+            // 提取推荐人
+            const referrerMatch = textInput.match(/([^，,\s]+)推荐/);
+            if (referrerMatch) {
+                document.getElementById('parsedReferrer').value = referrerMatch[1];
+            }
+
+            // 提取联系方式
+            const phoneMatch = textInput.match(/(\d{3}[-\s]?\d{4}[-\s]?\d{4})/);
+            const emailMatch = textInput.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+            const contacts = [];
+            if (phoneMatch) contacts.push(phoneMatch[1]);
+            if (emailMatch) contacts.push(emailMatch[1]);
+            document.getElementById('parsedContact').value = contacts.join(', ');
+
+            alert('信息解析完成，请检查并修改识别结果');
+        }
+
+        // 处理联系人图片
+        function processContactImage() {
+            const fileInput = document.getElementById('contactImageInput');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                // 这里可以集成OCR API来识别图片中的文字
+                alert('图片上传成功！实际使用中可以集成OCR服务来自动识别名片信息。');
+                // 示例：可以调用百度OCR、腾讯OCR等服务
+            }
+        }
+
+        // 保存新联系人
+        function saveNewContact() {
+            const name = document.getElementById('parsedName').value;
+            const position = document.getElementById('parsedPosition').value;
+            const company = document.getElementById('parsedCompany').value;
+            
+            if (!name || !company) {
+                alert('请至少填写姓名和公司信息');
+                return;
+            }
+
+            const newContact = {
+                id: contacts.length + 1,
+                name: name,
+                position: position,
+                company: company,
+                phone: document.getElementById('parsedContact').value.split(',')[0] || '',
+                email: document.getElementById('parsedContact').value.split(',')[1] || '',
+                industry: document.getElementById('parsedPreference').value.split(',').map(s => s.trim()).filter(s => s),
+                investmentPreference: document.getElementById('parsedPreference').value.split(',').map(s => s.trim()).filter(s => s),
+                relationship: document.getElementById('parsedRelationship').value,
+                referrer: document.getElementById('parsedReferrer').value,
+                contactInfo: document.getElementById('parsedContact').value,
+                relationshipStrength: document.getElementById('parsedRelationship').value === 'close' ? 90 : 
+                                    document.getElementById('parsedRelationship').value === 'medium' ? 70 : 50,
+                projects: [],
+                connections: [],
+                lastContact: new Date().toISOString().split('T')[0],
+                priority: 'medium'
+            };
+
+            contacts.push(newContact);
+            hideContactInputModal();
+            loadContactsTable();
+            alert('联系人添加成功！');
+        }
+
+        // 日程视图切换
+        function toggleScheduleView(viewType) {
+            currentScheduleView = viewType;
+            if (viewType === 'day') {
+                document.getElementById('dayScheduleView').classList.remove('hidden');
+                document.getElementById('weekScheduleView').classList.add('hidden');
+                document.getElementById('dayViewBtn').className = 'btn-primary text-sm';
+                document.getElementById('weekViewBtn').className = 'btn-secondary text-sm';
+                loadScheduleTimeline();
+            } else {
+                document.getElementById('dayScheduleView').classList.add('hidden');
+                document.getElementById('weekScheduleView').classList.remove('hidden');
+                document.getElementById('dayViewBtn').className = 'btn-secondary text-sm';
+                document.getElementById('weekViewBtn').className = 'btn-primary text-sm';
+                loadWeekView();
+            }
+        }
+
+        // 加载周视图
+        function loadWeekView() {
+            const container = document.getElementById('weekScheduleTable');
+            
+            // 计算当前周的日期范围
+            const today = new Date(selectedScheduleDate);
+            const currentDay = today.getDay();
+            const diff = currentDay === 0 ? -6 : 1 - currentDay; // 调整为周一开始
+            const monday = new Date(today);
+            monday.setDate(today.getDate() + diff + (currentWeekOffset * 7));
+            
+            const weekDates = [];
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(monday);
+                date.setDate(monday.getDate() + i);
+                weekDates.push(date);
+            }
+            
+            // 更新周视图标题
+            const startDate = weekDates[0];
+            const endDate = weekDates[6];
+            document.getElementById('weekViewTitle').textContent = 
+                `${startDate.getMonth() + 1}月${startDate.getDate()}日 - ${endDate.getMonth() + 1}月${endDate.getDate()}日 周程概览`;
+            
+            // 生成8:00-20:00的时间段
+            const timeSlots = [];
+            for (let hour = 8; hour <= 20; hour++) {
+                timeSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+            }
+            
+            container.innerHTML = timeSlots.map(timeSlot => {
+                const hour = parseInt(timeSlot.split(':')[0]);
+                
+                return `
+                    <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                        <td class="py-3 px-3 text-sm font-medium text-gray-600 bg-gray-50">${timeSlot}</td>
+                        ${weekDates.map(date => {
+                            const dateStr = formatDateToString(date);
+                            const daySchedule = scheduleData.find(s => 
+                                s.date === dateStr && parseInt(s.startTime.split(':')[0]) === hour
+                            );
+                            
+                            return `
+                                <td class="py-3 px-3 border-l border-gray-100">
+                                    ${daySchedule ? `
+                                        <div class="text-xs p-2 rounded bg-blue-100 text-blue-800 cursor-pointer hover:bg-blue-200" 
+                                             onclick="editWeekSchedule('${dateStr}', '${timeSlot}', ${daySchedule.id})"
+                                             title="${daySchedule.title}">
+                                            <div class="font-medium truncate">${daySchedule.title}</div>
+                                            ${daySchedule.location ? `<div class="text-gray-600 truncate">📍 ${daySchedule.location}</div>` : ''}
+                                        </div>
+                                    ` : `
+                                        <div class="h-8 flex items-center justify-center border border-dashed border-gray-200 rounded cursor-pointer hover:bg-blue-50 text-gray-400"
+                                             onclick="addWeekSchedule('${dateStr}', '${timeSlot}')"
+                                             title="点击添加日程">
+                                            +
+                                        </div>
+                                    `}
+                                </td>
+                            `;
+                        }).join('')}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // 周视图导航
+        function previousWeek() {
+            currentWeekOffset--;
+            loadWeekView();
+        }
+
+        function nextWeek() {
+            currentWeekOffset++;
+            loadWeekView();
+        }
+
+        // 周视图中添加日程
+        function addWeekSchedule(dateStr, timeSlot) {
+            const title = prompt(`为 ${dateStr} ${timeSlot} 添加日程:`);
+            if (title) {
+                const endHour = (parseInt(timeSlot.split(':')[0]) + 1).toString().padStart(2, '0') + ':00';
+                const newSchedule = {
+                    id: scheduleData.length + 1,
+                    title: title,
+                    startTime: timeSlot,
+                    endTime: endHour,
+                    location: '',
+                    type: 'other',
+                    priority: 'medium',
+                    date: dateStr,
+                    contactId: null,
+                    notes: ''
+                };
+                scheduleData.push(newSchedule);
+                loadWeekView();
+            }
+        }
+
+        // 编辑周视图中的日程
+        function editWeekSchedule(dateStr, timeSlot, scheduleId) {
+            const schedule = scheduleData.find(s => s.id === scheduleId);
+            if (schedule) {
+                const newTitle = prompt(`编辑日程标题:`, schedule.title);
+                if (newTitle !== null) {
+                    schedule.title = newTitle;
+                    loadWeekView();
+                }
+            }
+        }
+
+        // 加载商业机会表格
+        function loadOpportunities() {
+            const container = document.getElementById('opportunitiesTable');
+            
+            container.innerHTML = opportunitiesData.map((opp, index) => `
+                <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td class="py-3 px-4">
+                        <input type="text" value="${opp.name}" 
+                               class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                               onchange="updateOpportunityField(${opp.id}, 'name', this.value)"
+                               placeholder="输入项目名称">
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" value="${opp.type}" 
+                               class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                               onchange="updateOpportunityField(${opp.id}, 'type', this.value)"
+                               placeholder="如：人工智能">
+                    </td>
+                    <td class="py-3 px-4">
+                        <textarea class="w-full px-2 py-1 border border-gray-200 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                                  rows="2" 
+                                  onchange="updateOpportunityField(${opp.id}, 'info', this.value)"
+                                  placeholder="项目详细信息">${opp.info}</textarea>
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" value="${opp.expectedFee}" 
+                               class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                               onchange="updateOpportunityField(${opp.id}, 'expectedFee', this.value)"
+                               placeholder="如：200万">
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" value="${opp.cooperationTarget}" 
+                               class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                               onchange="updateOpportunityField(${opp.id}, 'cooperationTarget', this.value)"
+                               placeholder="合作对象">
+                    </td>
+                    <td class="py-3 px-4">
+                        <div class="flex flex-wrap gap-1">
+                            ${opp.recommendedPartners.map(partner => `
+                                                                    <span class="notion-tag notion-tag-purple"
+                                      onclick="contactRecommendedPartner('${opp.id}', '${partner}')">${partner}</span>
+                            `).join('')}
+                            ${opp.recommendedPartners.length === 0 ? '<span class="text-gray-400 text-xs">系统推荐中...</span>' : ''}
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <input type="text" value="${opp.contactedPartners.join(', ')}" 
+                               class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                               onchange="updateOpportunityField(${opp.id}, 'contactedPartners', this.value.split(', ').filter(p => p.trim()))"
+                               placeholder="已联系的合作伙伴">
+                    </td>
+                    <td class="py-3 px-4">
+                        <textarea class="w-full px-2 py-1 border border-gray-200 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" 
+                                  rows="2" 
+                                  onchange="updateOpportunityField(${opp.id}, 'followUp', this.value)"
+                                  placeholder="跟进情况...">${opp.followUp}</textarea>
+                    </td>
+                    <td class="py-3 px-4">
+                        <button onclick="deleteOpportunity(${opp.id})" class="btn btn-secondary text-xs w-full mb-1">删除</button>
+                        <button onclick="generateReport(${opp.id})" class="btn btn-primary text-xs w-full">报告</button>
+                    </td>
+                </tr>
+                ${index === opportunitiesData.length - 1 ? `
+                <tr class="border-b border-gray-100">
+                    <td colspan="9" class="py-3 px-4 text-center">
+                        <button onclick="addNewOpportunity()" class="btn btn-primary text-sm w-full">
+                            + 添加新的商业机会
+                        </button>
+                    </td>
+                </tr>
+                ` : ''}
+            `).join('');
+        }
+
+        // 更新商业机会字段
+        function updateOpportunityField(oppId, field, value) {
+            const opp = opportunitiesData.find(o => o.id == oppId);
+            if (opp) {
+                opp[field] = value;
+                
+                // 如果更新了项目类型或轮次，重新生成推荐合作伙伴
+                if (field === 'type' || field === 'round') {
+                    generateRecommendedPartners(oppId);
+                    loadOpportunities(); // 重新加载表格
+                }
+            }
+        }
+
+        // 生成推荐合作伙伴
+        function generateRecommendedPartners(oppId) {
+            const opp = opportunitiesData.find(o => o.id == oppId);
+            if (!opp || !opp.type) return;
+            
+            // 基于项目类型和轮次匹配投资人
+            const recommendations = contacts.filter(contact => {
+                return contact.industry.some(ind => 
+                    ind.includes(opp.type) || opp.type.includes(ind)
+                );
+            }).map(contact => `${contact.name}-${contact.company}`);
+            
+            opp.recommendedPartners = recommendations.slice(0, 3); // 最多推荐3个
+        }
+
+        // 添加新的商业机会
+        function addNewOpportunity() {
+            const newOpp = {
+                id: opportunitiesData.length + 1,
+                name: '',
+                type: '',
+                info: '',
+                expectedFee: '',
+                cooperationTarget: '',
+                recommendedPartners: [],
+                contactedPartners: [],
+                followUp: '',
+                status: 'pending'
+            };
+            opportunitiesData.push(newOpp);
+            loadOpportunities();
+        }
+
+        // 删除商业机会
+        function deleteOpportunity(oppId) {
+            if (confirm('确定要删除这个商业机会吗？')) {
+                const index = opportunitiesData.findIndex(o => o.id == oppId);
+                if (index > -1) {
+                    opportunitiesData.splice(index, 1);
+                    loadOpportunities();
+                }
+            }
+        }
+
+        // 联系推荐合作伙伴
+        function contactRecommendedPartner(oppId, partnerName) {
+            const opp = opportunitiesData.find(o => o.id == oppId);
+            if (opp && !opp.contactedPartners.includes(partnerName)) {
+                opp.contactedPartners.push(partnerName);
+                opp.followUp = `已联系${partnerName}，等待回复`;
+                loadOpportunities();
+                alert(`已标记联系${partnerName}，请及时跟进！`);
+            }
+        }
+
+        // 更新跟进情况
+        function updateFollowUp(oppId, followUpText) {
+            const opp = opportunitiesData.find(o => o.id == oppId);
+            if (opp) {
+                opp.followUp = followUpText;
+            }
+        }
+
+        // 添加联系人
+        function addContact() {
+            const needRecognition = confirm('是否需要图片或文字识别？\n点击"确定"进行智能识别\n点击"取消"手动输入');
+            
+            if (needRecognition) {
+                // 智能识别模式
+                const input = prompt('请输入联系人信息或描述：\n例如：张总，红杉资本中国基金管理合伙人，专注AI和新能源投资，李总推荐，手机138-0013-8888');
+                if (input) {
+                    parseAndAddContact(input);
+                }
+            } else {
+                // 手动输入模式
+                const name = prompt('联系人姓名：');
+                if (!name) return;
+                
+                const company = prompt('所在机构：');
+                if (!company) return;
+                
+                const position = prompt('职位：');
+                const preference = prompt('投资偏好（用逗号分隔）：');
+                const referrer = prompt('推荐人：');
+                const contactInfo = prompt('联系方式：');
+                
+                const newContact = {
+                    id: contacts.length + 1,
+                    name: name,
+                    position: position || '',
+                    company: company,
+                    phone: contactInfo ? contactInfo.split(',')[0]?.trim() : '',
+                    email: contactInfo ? contactInfo.split(',')[1]?.trim() : '',
+                    industry: preference ? preference.split(',').map(s => s.trim()).filter(s => s) : [],
+                    investmentPreference: preference ? preference.split(',').map(s => s.trim()).filter(s => s) : [],
+                    relationship: 'medium',
+                    referrer: referrer || '',
+                    contactInfo: contactInfo || '',
+                    relationshipStrength: 70,
+                    projects: [],
+                    connections: [],
+                    lastContact: new Date().toISOString().split('T')[0],
+                    priority: 'medium'
+                };
+                
+                contacts.push(newContact);
+                loadContactsTable();
+                alert('联系人添加成功！');
+            }
+        }
+
+        // 解析并添加联系人
+        function parseAndAddContact(input) {
+            // 简单的文本解析逻辑
+            const text = input.toLowerCase();
+            
+            // 提取姓名
+            const nameMatch = input.match(/^([^，,\s]+)/);
+            const name = nameMatch ? nameMatch[1] : '';
+            
+            // 提取公司名称
+            const companyPatterns = [
+                /([^，,\s]*资本[^，,\s]*)/,
+                /([^，,\s]*投资[^，,\s]*)/,
+                /([^，,\s]*基金[^，,\s]*)/,
+                /([^，,\s]*创投[^，,\s]*)/
+            ];
+            let company = '';
+            for (let pattern of companyPatterns) {
+                const match = input.match(pattern);
+                if (match) {
+                    company = match[1];
+                    break;
+                }
+            }
+            
+            // 提取职位
+            const positionMatch = input.match(/(管理合伙人|合伙人|投资总监|董事总经理|执行董事|VP|总裁|CEO|CTO|CFO)/);
+            const position = positionMatch ? positionMatch[1] : '';
+            
+            // 提取投资偏好
+            const industries = ['AI', '人工智能', '区块链', '新能源', '医疗', '教育', '企业服务', '消费', '互联网', '游戏'];
+            const rounds = ['天使轮', 'Pre-A', 'A轮', 'B轮', 'C轮'];
+            const foundPrefs = [];
+            
+            industries.forEach(industry => {
+                if (text.includes(industry.toLowerCase()) || input.includes(industry)) {
+                    foundPrefs.push(industry);
+                }
+            });
+            
+            rounds.forEach(round => {
+                if (input.includes(round)) {
+                    foundPrefs.push(round);
+                }
+            });
+            
+            // 提取推荐人
+            const referrerMatch = input.match(/([^，,\s]+)推荐/);
+            const referrer = referrerMatch ? referrerMatch[1] : '';
+            
+            // 提取联系方式
+            const phoneMatch = input.match(/(\d{3}[-\s]?\d{4}[-\s]?\d{4})/);
+            const emailMatch = input.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+            const contactsList = [];
+            if (phoneMatch) contactsList.push(phoneMatch[1]);
+            if (emailMatch) contactsList.push(emailMatch[1]);
+            
+            if (!name || !company) {
+                alert('无法识别姓名或公司信息，请手动输入');
+                return;
+            }
+            
+            const newContact = {
+                id: contacts.length + 1,
+                name: name,
+                position: position,
+                company: company,
+                phone: phoneMatch ? phoneMatch[1] : '',
+                email: emailMatch ? emailMatch[1] : '',
+                industry: foundPrefs,
+                investmentPreference: foundPrefs,
+                relationship: 'medium',
+                referrer: referrer,
+                contactInfo: contactsList.join(', '),
+                relationshipStrength: 70,
+                projects: [],
+                connections: [],
+                lastContact: new Date().toISOString().split('T')[0],
+                priority: 'medium'
+            };
+            
+            contacts.push(newContact);
+            loadContactsTable();
+            alert(`联系人添加成功！\n识别结果：${name} - ${company} - ${position}`);
+        }
+
+        // Excel导入功能
+        function importExcelFile() {
+            const fileInput = document.getElementById('excelFileInput');
+            const file = fileInput.files[0];
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        // 这里可以使用SheetJS等库来解析Excel文件
+                        // 现在先提供一个简单的CSV解析示例
+                        const text = e.target.result;
+                        const lines = text.split('\n');
+                        const headers = lines[0].split(',');
+                        
+                        let importedCount = 0;
+                        for (let i = 1; i < lines.length; i++) {
+                            const values = lines[i].split(',');
+                            if (values.length >= 2 && values[0].trim()) {
+                                const newProject = {
+                                    id: projects.length + importedCount + 1,
+                                    name: values[0]?.trim() || '',
+                                    stage: values[1]?.trim() || 'initial',
+                                    priority: values[2]?.trim() || 'medium',
+                                    contacts: [],
+                                    industry: values[3]?.trim() || '',
+                                    round: values[4]?.trim() || '',
+                                    amount: values[5]?.trim() || '',
+                                    description: values[6]?.trim() || ''
+                                };
+                                projects.push(newProject);
+                                importedCount++;
+                            }
+                        }
+                        
+                        if (importedCount > 0) {
+                            loadProjects();
+                            alert(`成功导入 ${importedCount} 个项目！`);
+                        } else {
+                            alert('没有找到有效的项目数据');
+                        }
+                    } catch (error) {
+                        alert('文件解析失败，请确保文件格式正确\n支持格式：CSV文件，列顺序为：项目名称,阶段,优先级,行业,轮次,金额,描述');
+                    }
+                };
+                
+                if (file.name.endsWith('.csv')) {
+                    reader.readAsText(file);
+                } else {
+                    alert('当前版本仅支持CSV格式文件\n请将Excel文件另存为CSV格式后重新导入');
+                }
+            }
+        }
+
+        // 占位函数
+        function editContact(id) { alert(`编辑联系人 ID: ${id}`); }
+        function addProject() { alert('添加项目功能'); }
+        function generateReport(id) { alert(`生成项目报告 ID: ${id}`); }
+        function contactPerson(id) { alert(`联系联系人 ID: ${id}`); }
+        function scheduleWithContact(id) { alert(`安排会议 联系人 ID: ${id}`); }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+    </script>
+
+    <style>
+        /* Notion 风格基础样式 */
+        
+        /* 侧边栏 - Notion 风格 */
+        .sidebar {
+            @apply bg-gray-50 border-r border-gray-200;
+        }
+        
+        .nav-item {
+            @apply block px-4 py-4 rounded-xl hover:bg-gray-50 transition-all duration-200 cursor-pointer;
+        }
+        
+        .nav-item:hover {
+            transform: translateX(4px);
+        }
+        
+        .nav-item.active {
+            @apply bg-white shadow-sm border border-gray-100;
+        }
+        
+        .nav-item.active:hover {
+            transform: none;
+        }
+        
+        /* 卡片 - Notion 极简风格 */
+        .notion-card {
+            @apply bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow duration-150;
+        }
+        
+        /* 表格 - Notion 风格 */
+        .notion-table {
+            @apply bg-white border border-gray-200 rounded-lg overflow-hidden;
+        }
+        
+        .notion-table thead {
+            @apply bg-gray-50;
+        }
+        
+        .notion-table th {
+            @apply py-3 px-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b border-gray-200;
+        }
+        
+        .notion-table td {
+            @apply py-3 px-4 border-b border-gray-100 text-sm;
+        }
+        
+        .notion-table tbody tr:hover {
+            @apply bg-gray-50;
+        }
+        
+        /* 按钮 - Notion 简洁风格 */
+        .notion-btn {
+            @apply px-3 py-2 text-sm font-medium rounded-md transition-colors duration-150 focus:outline-none;
+        }
+        
+        .notion-btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700;
+        }
+        
+        .notion-btn-secondary {
+            @apply bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300;
+        }
+        
+        .notion-btn-ghost {
+            @apply text-gray-600 hover:bg-gray-100 hover:text-gray-900;
+        }
+        
+        /* 输入框 - Notion 风格 */
+        .notion-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm transition-colors duration-150;
+        }
+        
+        /* 标签 - Notion 风格 */
+        .notion-tag {
+            @apply inline-flex items-center px-2 py-1 rounded text-xs font-medium;
+        }
+        
+        .notion-tag-gray {
+            @apply bg-gray-100 text-gray-800;
+        }
+        
+        .notion-tag-blue {
+            @apply bg-blue-100 text-blue-800;
+        }
+        
+        .notion-tag-green {
+            @apply bg-green-100 text-green-800;
+        }
+        
+        .notion-tag-yellow {
+            @apply bg-yellow-100 text-yellow-800;
+        }
+        
+        .notion-tag-red {
+            @apply bg-red-100 text-red-800;
+        }
+        
+        .notion-tag-purple {
+            @apply bg-purple-100 text-purple-800 hover:bg-purple-200 cursor-pointer;
+        }
+        
+        /* 统计卡片 - Notion 风格 */
+        .notion-stat-card {
+            @apply bg-white border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow duration-150;
+        }
+        
+        /* 主要内容区域 */
+        .main-content {
+            @apply bg-white;
+        }
+        
+        /* 页面标题 */
+        .page-title {
+            @apply text-2xl font-semibold text-gray-900 mb-1;
+        }
+        
+        .page-subtitle {
+            @apply text-sm text-gray-600 mb-8;
+        }
+        
+        /* 关系远近样式 */
+        .relationship-close { @apply text-green-600 font-medium; }
+        .relationship-medium { @apply text-yellow-600 font-medium; }
+        .relationship-distant { @apply text-gray-500; }
+        
+        /* 优先级样式 */
+        .priority-urgent { @apply bg-red-50 text-red-700 border border-red-200; }
+        .priority-high { @apply bg-orange-50 text-orange-700 border border-orange-200; }
+        .priority-medium { @apply bg-blue-50 text-blue-700 border border-blue-200; }
+        .priority-low { @apply bg-gray-50 text-gray-600 border border-gray-200; }
+        
+
+        
+        /* 悬停效果 */
+        .hover-lift:hover {
+            transform: translateY(-1px);
+        }
+        
+        /* 分隔线 */
+        .divider {
+            @apply border-b border-gray-200 my-6;
+        }
+    </style>
+</body>
+</html>
