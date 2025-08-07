@@ -1,0 +1,20 @@
+{
+  "name": "personal-crm",
+  "version": 2,
+  "builds": [
+    {
+      "src": "personal-crm.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/",
+      "dest": "/personal-crm.html"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/personal-crm.html"
+    }
+  ]
+}
