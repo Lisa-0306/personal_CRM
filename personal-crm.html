@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.personalcrm.info https://personalcrm.info http://localhost:3000 http://127.0.0.1:3000; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
+    <meta name="referrer" content="no-referrer">
     <title>个人CRM管理系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
+
     <style>
         .btn { @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer; }
         .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700; }
@@ -19,7 +22,37 @@
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
+    <!-- 登录/注册遮罩（手机或邮箱） -->
+    <div id="authOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-3 text-center">登录到 Personal CRM</h2>
+            <div class="flex mb-4 border rounded-lg overflow-hidden">
+                <button id="tabPhone" class="flex-1 py-2 bg-blue-50 text-blue-700" onclick="switchLoginTab('phone')">手机登录</button>
+                <button id="tabEmail" class="flex-1 py-2 text-gray-600 hover:bg-gray-50" onclick="switchLoginTab('email')">邮箱登录</button>
+            </div>
+            <div id="phoneLoginSection" class="space-y-3">
+                <input id="phoneInput" type="tel" class="notion-input" placeholder="请输入11位手机号（可输入 +86 138... 或 138...）" autocomplete="tel">
+                <div class="flex gap-2">
+                    <button id="sendCodeBtn" class="notion-btn notion-btn-secondary flex-1" onclick="sendPhoneCode()">获取验证码</button>
+                    <input id="codeInput" type="text" class="notion-input" placeholder="验证码" style="max-width: 10rem;">
+                </div>
+                <div id="recaptcha-container"></div>
+                <button class="notion-btn notion-btn-primary w-full" onclick="confirmPhoneCode()">登录</button>
+            </div>
+            <div id="emailLoginSection" class="space-y-3 hidden">
+                <input id="emailInput" type="email" class="notion-input" placeholder="邮箱" autocomplete="email">
+                <input id="passwordInput" type="password" class="notion-input" placeholder="密码" autocomplete="current-password">
+                <div class="flex gap-2">
+                    <button class="notion-btn notion-btn-primary flex-1" onclick="emailSignIn()">邮箱登录</button>
+                    <button class="notion-btn notion-btn-secondary flex-1" onclick="emailSignUp()">注册</button>
+                </div>
+            </div>
+            <p id="loginError" class="text-xs text-red-600 mt-2 hidden"></p>
+        </div>
+    </div>
+
+    <div id="appRoot" style="display:none">
+        <div class="flex h-screen">
         <!-- 侧边栏 - 宽敞舒适版本 -->
         <div class="w-80 sidebar flex flex-col">
             <!-- 顶部标题区域 - 更多留白 -->
@@ -107,6 +140,7 @@
                         <span class="text-lg">⚙️</span>
                     </div>
                 </div>
+                <button onclick="logout()" class="notion-btn notion-btn-secondary text-xs mt-3 w-full">退出登录</button>
             </div>
         </div>
 
@@ -420,6 +454,406 @@
     </div>
 
     <script>
+        // 后端API配置 - 自动选择本地或线上，可通过 window.PERSONALCRM_API_BASE 覆盖
+        const API_BASE_URL = (function() {
+            if (window.PERSONALCRM_API_BASE) return window.PERSONALCRM_API_BASE;
+            if (location.protocol === 'file:') {
+                // 本地以 file:// 打开页面时，默认指向本机后端
+                return 'http://localhost:3000/api/auth';
+            }
+            const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+            if (isLocal) return 'http://localhost:3000/api/auth';
+            // 线上使用同源
+            return `${location.origin}/api/auth`;
+        })();
+        
+        function onAuth() {
+            const overlay = document.getElementById('authOverlay');
+            const appRoot = document.getElementById('appRoot');
+            
+            // 支持通过 ?forceLogin=1 强制显示登录（便于调试或清缓存）
+            try {
+                const params = new URLSearchParams(location.search);
+                if (params.get('forceLogin') === '1') {
+                    sessionStorage.removeItem('userToken');
+                    sessionStorage.removeItem('userInfo');
+                    sessionStorage.removeItem('loginPhone');
+                }
+            } catch (_) {}
+
+            // 检查是否已登录（有有效token）
+            const token = sessionStorage.getItem('userToken');
+            if (token && isTokenValid(token)) {
+                overlay.classList.add('hidden'); 
+                appRoot.style.display = 'block';
+            } else {
+                overlay.classList.remove('hidden'); 
+                appRoot.style.display = 'none';
+            }
+        }
+        
+        function isTokenValid(token) {
+            try {
+                // 简单的JWT token检查（实际项目中应该验证签名和过期时间）
+                const payload = JSON.parse(atob(token.split('.')[1]));
+                return payload.exp > Date.now() / 1000;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 离线应急：本地生成JWT（仅用于无网络或后端不可用时的演示登录）
+        function createLocalDemoToken(payload) {
+            const header = { alg: 'none', typ: 'JWT' };
+            const toB64 = (obj) => btoa(JSON.stringify(obj));
+            return `${toB64(header)}.${toB64(payload)}.`; // 无签名，仅用于前端演示
+        }
+
+        function generateLocalOTP() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+
+        function saveOfflineOtp(phone, otp) {
+            const data = { otp, expires: Date.now() + 5 * 60 * 1000 };
+            sessionStorage.setItem(`offlineOtp_${phone}`, JSON.stringify(data));
+        }
+
+        function readOfflineOtp(phone) {
+            const raw = sessionStorage.getItem(`offlineOtp_${phone}`);
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+        }
+        function switchLoginTab(tab) {
+            const phone = document.getElementById('phoneLoginSection');
+            const email = document.getElementById('emailLoginSection');
+            const tabPhone = document.getElementById('tabPhone');
+            const tabEmail = document.getElementById('tabEmail');
+            if (tab === 'phone') {
+                phone.classList.remove('hidden'); email.classList.add('hidden');
+                tabPhone.className = 'flex-1 py-2 bg-blue-50 text-blue-700';
+                tabEmail.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
+            } else {
+                email.classList.remove('hidden'); phone.classList.add('hidden');
+                tabEmail.className = 'flex-1 py-2 bg-blue-50 text-blue-700';
+                tabPhone.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
+            }
+            document.getElementById('loginError').classList.add('hidden');
+        }
+        // 手机登录相关函数
+        async function sendPhoneCode() {
+            const phoneRaw = document.getElementById('phoneInput').value.trim();
+            let phone = phoneRaw.replace(/[\s-]/g, '');
+            if (phone.startsWith('+86')) phone = phone.slice(3);
+            if (phone.startsWith('86') && phone.length > 11) phone = phone.slice(2);
+            const err = document.getElementById('loginError');
+            err.classList.add('hidden');
+            
+            if (!phone) { 
+                err.textContent = '请输入有效手机号'; 
+                err.classList.remove('hidden'); 
+                return; 
+            }
+            
+            // 简单的手机号格式验证
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                err.textContent = '请输入正确的手机号码格式（11位数字）';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/request-phone-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phone: phone })
+                });
+                let result = {};
+                try { result = await response.json(); } catch (_) {}
+                if (response.ok && result.success) {
+                    if (result.otp) {
+                        alert(`验证码已发送：${result.otp}\n（仅用于调试，生产环境不会返回验证码）`);
+                        const codeInput = document.getElementById('codeInput');
+                        if (codeInput) codeInput.value = result.otp;
+                    } else {
+                        alert('验证码已发送。如未配置短信服务，请到后端日志查看验证码。');
+                    }
+                    // 存储手机号以便验证时使用
+                    sessionStorage.setItem('loginPhone', phone);
+                } else {
+                    err.textContent = (result && (result.message || result.error)) || `发送验证码失败 (HTTP ${response.status})`;
+                    err.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('发送验证码失败:', error);
+                // 离线应急：在本地生成并保存验证码，便于继续体验流程
+                try {
+                    const localOtp = generateLocalOTP();
+                    saveOfflineOtp(phone, localOtp);
+                    sessionStorage.setItem('loginPhone', phone);
+                    console.log(`[OFFLINE OTP] send to ${phone}: ${localOtp}`);
+                    alert('网络不可用，已启用离线验证码（本地模拟）。请在控制台查看验证码。');
+                } catch (e) {
+                    err.textContent = (error && error.message) ? `网络错误：${error.message}` : '网络错误，请稍后重试';
+                    err.classList.remove('hidden');
+                }
+            }
+        }
+        
+        async function confirmPhoneCode() {
+            const code = document.getElementById('codeInput').value.trim();
+            const phone = sessionStorage.getItem('loginPhone');
+            const err = document.getElementById('loginError');
+            err.classList.add('hidden');
+            
+            if (!code) { 
+                err.textContent = '请输入验证码'; 
+                err.classList.remove('hidden'); 
+                return; 
+            }
+            
+            if (!phone) {
+                err.textContent = '登录信息丢失，请重新获取验证码';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/verify-phone-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ phone: phone, otp: code })
+                });
+                let result = {};
+                try { result = await response.json(); } catch (_) {}
+                if (response.ok && result.success) {
+                    // 登录成功，保存用户信息和token
+                    sessionStorage.setItem('userToken', result.token);
+                    sessionStorage.setItem('userInfo', JSON.stringify(result.user));
+                    
+                    // 隐藏登录界面，显示应用
+                    const overlay = document.getElementById('authOverlay');
+                    const appRoot = document.getElementById('appRoot');
+                    overlay.classList.add('hidden');
+                    appRoot.style.display = 'block';
+                    
+                    // 清理临时数据
+                    sessionStorage.removeItem('loginPhone');
+                } else {
+                    err.textContent = (result && (result.message || result.error)) || `登录失败 (HTTP ${response.status})`;
+                    err.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('验证码验证失败:', error);
+                // 离线应急：校验本地模拟验证码
+                try {
+                    const off = readOfflineOtp(phone);
+                    if (off && Date.now() <= off.expires && off.otp === code) {
+                        // 构造演示用 token 与用户信息
+                        const payload = {
+                            sub: `offline-${phone}`,
+                            phone,
+                            exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
+                        };
+                        const token = createLocalDemoToken(payload);
+                        const user = { id: payload.sub, phone, email: null, loginType: 'phone' };
+
+                        sessionStorage.setItem('userToken', token);
+                        sessionStorage.setItem('userInfo', JSON.stringify(user));
+
+                        const overlay = document.getElementById('authOverlay');
+                        const appRoot = document.getElementById('appRoot');
+                        overlay.classList.add('hidden');
+                        appRoot.style.display = 'block';
+
+                        sessionStorage.removeItem(`offlineOtp_${phone}`);
+                        sessionStorage.removeItem('loginPhone');
+                        return;
+                    }
+                } catch (_) { /* ignore */ }
+
+                err.textContent = (error && error.message) ? `网络错误：${error.message}` : '网络错误，请稍后重试';
+                err.classList.remove('hidden');
+            }
+        }
+        // 邮箱登录函数
+        async function emailSignIn() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const err = document.getElementById('loginError');
+            err.classList.add('hidden');
+            
+            if (!email || !password) {
+                err.textContent = '请输入邮箱和密码';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            // 简单的邮箱格式验证
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                err.textContent = '请输入正确的邮箱格式';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/email-login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // 登录成功
+                    sessionStorage.setItem('userToken', result.token);
+                    sessionStorage.setItem('userInfo', JSON.stringify(result.user));
+                    
+                    // 隐藏登录界面，显示应用
+                    const overlay = document.getElementById('authOverlay');
+                    const appRoot = document.getElementById('appRoot');
+                    overlay.classList.add('hidden');
+                    appRoot.style.display = 'block';
+                } else if (result.code === 'USER_NOT_FOUND') {
+                    // 用户不存在，询问是否注册
+                    if (confirm('该邮箱尚未注册，是否立即注册？')) {
+                        await emailSignUp();
+                    }
+                } else {
+                    err.textContent = result.message || '登录失败';
+                    err.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('邮箱登录失败:', error);
+                err.textContent = '网络错误，请稍后重试';
+                err.classList.remove('hidden');
+            }
+        }
+        
+        // 邮箱注册函数
+        async function emailSignUp() {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value;
+            const err = document.getElementById('loginError');
+            err.classList.add('hidden');
+            
+            if (!email || !password) {
+                err.textContent = '请输入邮箱和密码';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            if (password.length < 6) {
+                err.textContent = '密码至少需要6位';
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/email-register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ email: email, password: password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    sessionStorage.setItem('userToken', result.token);
+                    sessionStorage.setItem('userInfo', JSON.stringify(result.user));
+                    
+                    // 隐藏登录界面，显示应用
+                    const overlay = document.getElementById('authOverlay');
+                    const appRoot = document.getElementById('appRoot');
+                    overlay.classList.add('hidden');
+                    appRoot.style.display = 'block';
+                    
+                    alert('注册并登录成功！');
+                } else {
+                    err.textContent = result.message || '注册失败';
+                    err.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('邮箱注册失败:', error);
+                err.textContent = '网络错误，请稍后重试';
+                err.classList.remove('hidden');
+            }
+        }
+
+        function abToB64(buffer) {
+            let binary = '';
+            const bytes = new Uint8Array(buffer);
+            for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+            return btoa(binary);
+        }
+        function b64ToAb(b64) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+            return bytes.buffer;
+        }
+        function b64ToU8(b64) { return new Uint8Array(b64ToAb(b64)); }
+        function concatU8(a, b) { const r = new Uint8Array(a.length + b.length); r.set(a, 0); r.set(b, a.length); return r; }
+
+        async function hashWithSalt(pass, saltB64) {
+            const enc = new TextEncoder();
+            const data = concatU8(b64ToU8(saltB64), enc.encode(pass));
+            const digest = await crypto.subtle.digest('SHA-256', data);
+            return abToB64(digest);
+        }
+        async function deriveEncryptionKey(pass, saltB64) {
+            const enc = new TextEncoder();
+            const baseKey = await crypto.subtle.importKey('raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']);
+            const key = await crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: b64ToU8(saltB64), iterations: 100000, hash: 'SHA-256' },
+                baseKey,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['encrypt', 'decrypt']
+            );
+            return key;
+        }
+        async function encryptString(plain) {
+            if (!window._encryptionKey) return null;
+            const enc = new TextEncoder();
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const cipherBuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, window._encryptionKey, enc.encode(plain));
+            return JSON.stringify({ v: 1, iv: abToB64(iv), cipher: abToB64(cipherBuf) });
+        }
+        async function decryptString(payload) {
+            if (!window._encryptionKey) return null;
+            try {
+                const obj = typeof payload === 'string' ? JSON.parse(payload) : payload;
+                if (!obj || !obj.iv || !obj.cipher) return null;
+                const iv = b64ToU8(obj.iv);
+                const cipherBuf = b64ToAb(obj.cipher);
+                const plainBuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, window._encryptionKey, cipherBuf);
+                return new TextDecoder().decode(plainBuf);
+            } catch (e) { return null; }
+        }
+        function logout() {
+            // 清除用户数据
+            sessionStorage.removeItem('userToken');
+            sessionStorage.removeItem('userInfo');
+            sessionStorage.removeItem('loginPhone');
+            window._encryptionKey = null;
+            
+            const overlay = document.getElementById('authOverlay');
+            const appRoot = document.getElementById('appRoot');
+            if (overlay) overlay.classList.remove('hidden');
+            if (appRoot) appRoot.style.display = 'none';
+        }
+        function setupAuthGate() { onAuth(); switchLoginTab('phone'); }
         // 示例数据
         const contacts = [
             {
@@ -1071,17 +1505,29 @@
             alert('日程更改已保存！');
         }
 
-        // 加载明日提醒事项
+        // 加载明日提醒事项（支持解密）
         function loadTomorrowReminderCRM() {
             const saved = localStorage.getItem('tomorrow-reminder-crm');
-            if (saved) {
-                document.getElementById('tomorrowReminderCRM').value = saved;
-            }
+            if (!saved) return;
+            (async () => {
+                let value = '';
+                if (saved && saved.startsWith('{')) {
+                    const dec = await decryptString(saved);
+                    value = dec ?? '';
+                } else {
+                    value = saved;
+                }
+                document.getElementById('tomorrowReminderCRM').value = value;
+            })();
         }
 
-        // 保存明日提醒事项
-        function saveTomorrowReminderCRM() {
+        // 保存明日提醒事项（优先加密）
+        async function saveTomorrowReminderCRM() {
             const value = document.getElementById('tomorrowReminderCRM').value;
+            if (window._encryptionKey) {
+                const payload = await encryptString(value);
+                if (payload) { localStorage.setItem('tomorrow-reminder-crm', payload); return; }
+            }
             localStorage.setItem('tomorrow-reminder-crm', value);
         }
 
@@ -1788,9 +2234,7 @@
         function scheduleWithContact(id) { alert(`安排会议 联系人 ID: ${id}`); }
 
         // 初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            loadDashboard();
-        });
+        document.addEventListener('DOMContentLoaded', function() { setupAuthGate(); loadDashboard(); });
     </script>
 
     <style>
