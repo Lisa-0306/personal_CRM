@@ -2,19 +2,12 @@
   "name": "personal-crm",
   "version": 2,
   "builds": [
-    {
-      "src": "personal-crm.html",
-      "use": "@vercel/static"
-    }
+    { "src": "personal-crm.html", "use": "@vercel/static" },
+    { "src": "api/**/*.js", "use": "@vercel/node" }
   ],
   "routes": [
-    {
-      "src": "/",
-      "dest": "/personal-crm.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/personal-crm.html"
-    }
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/", "dest": "/personal-crm.html" },
+    { "src": "/(.*)", "dest": "/personal-crm.html" }
   ]
 }
