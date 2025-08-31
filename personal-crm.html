@@ -158,6 +158,98 @@
         td {
             color: var(--text-secondary);
         }
+        
+        /* 日程安排专用样式 */
+        #schedule-view .notion-card {
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+        }
+        
+        #schedule-view .notion-table {
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        #schedule-view .notion-table table {
+            border-collapse: collapse;
+        }
+        
+        #schedule-view .notion-table th {
+            background-color: #f8fafc;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        #schedule-view .notion-table td {
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+        
+        #schedule-view .notion-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        #schedule-view .notion-input {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        
+        #schedule-view .notion-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        
+        #schedule-view select {
+            font-size: 0.875rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        #schedule-view select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        
+        #schedule-view textarea {
+            font-size: 0.875rem;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        
+        #schedule-view textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            outline: none;
+        }
+        
+        /* 优先级颜色 */
+        .priority-high {
+            background-color: #fef2f2 !important;
+            color: #dc2626 !important;
+        }
+        
+        .priority-medium {
+            background-color: #fffbeb !important;
+            color: #d97706 !important;
+        }
+        
+        .priority-low {
+            background-color: #f0fdf4 !important;
+            color: #16a34a !important;
+        }
+        
+        .priority-urgent {
+            background-color: #fef2f2 !important;
+            color: #dc2626 !important;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body class="bg-gray-50">
@@ -490,41 +582,41 @@
 
 
             <!-- 日程安排视图 -->
-            <div id="schedule-view" class="view-content hidden" style="padding: var(--vc-pad, 2rem);">
-                <div class="mb-8">
-                    <div class="flex justify-between items-start">
+            <div id="schedule-view" class="view-content hidden" style="padding: 1rem;">
+                <div class="mb-4">
+                    <div class="flex justify-between items-center">
                         <div>
-                            <h1 class="page-title">日程安排</h1>
-                            <p class="page-subtitle">智能日程管理</p>
+                            <h1 class="page-title text-2xl">日程安排</h1>
+                            <p class="page-subtitle text-sm">智能日程管理</p>
                         </div>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="toggleScheduleView('day')" id="dayViewBtn" class="notion-btn notion-btn-primary text-sm">日视图</button>
-                            <button onclick="toggleScheduleView('week')" id="weekViewBtn" class="notion-btn notion-btn-secondary text-sm">周视图</button>
+                        <div class="flex items-center space-x-1">
+                            <button onclick="toggleScheduleView('day')" id="dayViewBtn" class="notion-btn notion-btn-primary text-xs px-3 py-1">日视图</button>
+                            <button onclick="toggleScheduleView('week')" id="weekViewBtn" class="notion-btn notion-btn-secondary text-xs px-3 py-1">周视图</button>
                             <input 
                                 type="date" 
                                 id="scheduleDateSelector" 
-                                class="notion-input text-sm w-auto"
+                                class="notion-input text-xs w-32 px-2 py-1"
                                 onchange="changeScheduleDate(this.value)"
                             >
-                            <button onclick="goToScheduleToday()" class="notion-btn notion-btn-ghost text-sm">今天</button>
+                            <button onclick="goToScheduleToday()" class="notion-btn notion-btn-ghost text-xs px-3 py-1">今天</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 日视图 -->
-                <div id="dayScheduleView" class="notion-card">
-                    <div class="flex justify-between items-center mb-6">
-                        <h3 class="text-base font-medium text-gray-900" id="scheduleTimelineTitle">今日日程时间线</h3>
-                        <button onclick="saveScheduleChanges()" class="notion-btn notion-btn-primary">保存</button>
+                <div id="dayScheduleView" class="notion-card p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-lg font-semibold text-gray-900" id="scheduleTimelineTitle">今日日程时间线</h3>
+                        <button onclick="saveScheduleChanges()" class="notion-btn notion-btn-primary text-sm px-4 py-1">💾 保存</button>
                     </div>
                     <div class="notion-table">
-                        <table class="w-full">
+                        <table class="w-full text-sm">
                             <thead>
-                                <tr>
-                                    <th class="w-20">时间</th>
-                                    <th class="min-w-48">事项</th>
-                                    <th class="w-28">紧急程度</th>
-                                    <th class="min-w-48">备注信息</th>
+                                <tr class="bg-gray-50">
+                                    <th class="w-16 py-2 px-2 text-left font-medium text-gray-700">时间</th>
+                                    <th class="min-w-40 py-2 px-2 text-left font-medium text-gray-700">事项</th>
+                                    <th class="w-20 py-2 px-2 text-left font-medium text-gray-700">优先级</th>
+                                    <th class="min-w-32 py-2 px-2 text-left font-medium text-gray-700">备注</th>
                                 </tr>
                             </thead>
                             <tbody id="scheduleTimelineTable">
@@ -535,27 +627,27 @@
                 </div>
 
                 <!-- 周视图 -->
-                <div id="weekScheduleView" class="card hidden">
-                    <div class="flex justify-between items-center mb-4">
+                <div id="weekScheduleView" class="notion-card p-4 hidden">
+                    <div class="flex justify-between items-center mb-3">
                         <h3 class="text-lg font-semibold text-gray-900" id="weekViewTitle">本周日程概览</h3>
-                        <div class="flex items-center space-x-2">
-                            <button onclick="previousWeek()" class="btn-secondary text-sm">← 上周</button>
-                            <button onclick="nextWeek()" class="btn-secondary text-sm">下周 →</button>
-                            <button onclick="saveScheduleChanges()" class="btn-success text-sm">💾 保存更改</button>
+                        <div class="flex items-center space-x-1">
+                            <button onclick="previousWeek()" class="btn-secondary text-xs px-2 py-1">← 上周</button>
+                            <button onclick="nextWeek()" class="btn-secondary text-xs px-2 py-1">下周 →</button>
+                            <button onclick="saveScheduleChanges()" class="btn-success text-xs px-3 py-1">💾 保存</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full border-collapse">
+                        <table class="w-full border-collapse text-sm">
                             <thead>
-                                <tr class="bg-gray-50 border-b-2 border-gray-200">
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 w-16">时间</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周一</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周二</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周三</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周四</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周五</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周六</th>
-                                    <th class="text-left py-3 px-3 font-medium text-gray-700 min-w-32">周日</th>
+                                <tr class="bg-gray-50 border-b border-gray-200">
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 w-12">时间</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周一</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周二</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周三</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周四</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周五</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周六</th>
+                                    <th class="text-left py-2 px-2 font-medium text-gray-700 min-w-24">周日</th>
                                 </tr>
                             </thead>
                             <tbody id="weekScheduleTable">
@@ -1690,19 +1782,19 @@
                 
                 return `
                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td class="py-1 px-3 text-xs font-medium text-gray-600 bg-gray-50 whitespace-nowrap">${timeSlot}-${(parseInt(timeSlot.split(':')[0])+1).toString().padStart(2,'0')}:00</td>
-                        <td class="py-1 px-3">
+                        <td class="py-1 px-2 text-xs font-medium text-gray-600 bg-gray-50 whitespace-nowrap">${timeSlot}-${(parseInt(timeSlot.split(':')[0])+1).toString().padStart(2,'0')}:00</td>
+                        <td class="py-1 px-2">
                             <input type="text" 
                                    value="${scheduleInSlot ? (scheduleInSlot.item || '') : ''}" 
                                    placeholder="点击输入事项"
-                                   class="notion-input text-lg"
-                                   style="padding-top:12px; padding-bottom:12px;"
+                                   class="notion-input text-sm w-full"
+                                   style="padding: 6px 8px;"
                                    data-time="${timeSlot}" 
                                    data-field="title"
                                    onchange="updateScheduleField(this)">
                         </td>
-                        <td class="py-1 px-3">
-                            <select class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-lg priority-${scheduleInSlot ? urgencyToPriority(scheduleInSlot.urgency||'medium') : 'medium'}"
+                        <td class="py-1 px-2">
+                            <select class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm priority-${scheduleInSlot ? urgencyToPriority(scheduleInSlot.urgency||'medium') : 'medium'}"
                                     data-time="${timeSlot}" 
                                     data-field="priority"
                                     onchange="updateScheduleField(this)">
@@ -1712,10 +1804,10 @@
                                 <option value="urgent" ${scheduleInSlot && scheduleInSlot.priority === 'urgent' ? 'selected' : ''}>紧急</option>
                             </select>
                         </td>
-                        <td class="py-1 px-3">
-                            <textarea class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-lg resize-y" 
-                                      rows="4"
-                                      placeholder="备注信息（可多行）"
+                        <td class="py-1 px-2">
+                            <textarea class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm resize-y" 
+                                      rows="2"
+                                      placeholder="备注信息"
                                       data-time="${timeSlot}" 
                                       data-field="notes"
                                        onchange="updateScheduleField(this)">${scheduleInSlot ? (scheduleInSlot.notes || '') : ''}</textarea>
