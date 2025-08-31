@@ -7,39 +7,157 @@
     <meta name="referrer" content="no-referrer">
     <title>个人CRM管理系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
+    <!-- 使用微软雅黑字体，无需外部字体 -->
 
     <style>
         :root {
-            --bg-gradient: #f5f6f7;
+            --bg-gradient: #fafbfc;
             --card-bg: #ffffff;
             --glass-blur: none;
-            --accent: #3370ff;
+            --accent: #2563eb;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --hover-bg: #f9fafb;
         }
         body {
-            font-family: 'Inter', 'Noto Serif SC', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+            font-family: "Microsoft YaHei", "微软雅黑", "SimHei", "黑体", Arial, sans-serif;
             background: var(--bg-gradient);
+            font-weight: 400;
+            line-height: 1.6;
         }
         .notion-card, .notion-table, .card {
             background: var(--card-bg);
             backdrop-filter: var(--glass-blur);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
         }
-        .page-title { letter-spacing: 0.02em; }
-        .page-subtitle { opacity: 0.85; }
-        .notion-btn-primary { background-color: var(--accent); border-color: var(--accent); }
-        .notion-btn-primary:hover { background-color: #2b5fe6; }
-        .btn { @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer; }
-        .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700; }
-        .btn-success { @apply bg-green-600 text-white hover:bg-green-700; }
-        .btn-secondary { @apply bg-gray-500 text-white hover:bg-gray-600; }
-        .card { @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6; }
-        .relationship-node { @apply inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm mr-2 mb-2 cursor-pointer hover:bg-blue-200; }
-        .project-tag { @apply inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm mr-2 mb-2; }
-        .priority-high { @apply bg-red-100 border-red-300 text-red-800; }
-        .priority-medium { @apply bg-yellow-100 border-yellow-300 text-yellow-800; }
-        .priority-low { @apply bg-gray-100 border-gray-300 text-gray-600; }
+        .page-title { 
+            letter-spacing: 0.02em; 
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+        .page-subtitle { 
+            opacity: 0.8; 
+            color: var(--text-secondary);
+        }
+        .notion-btn-primary { 
+            background-color: var(--accent); 
+            border-color: var(--accent); 
+            color: white;
+            font-weight: 500;
+        }
+        .notion-btn-primary:hover { 
+            background-color: #1d4ed8; 
+            border-color: #1d4ed8;
+        }
+        .btn { 
+            @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 cursor-pointer;
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+        .btn-primary { 
+            @apply text-white;
+            background-color: var(--accent);
+            border: 1px solid var(--accent);
+        }
+        .btn-primary:hover { 
+            background-color: #1d4ed8;
+            border-color: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .btn-success { 
+            @apply text-white;
+            background-color: #059669;
+            border: 1px solid #059669;
+        }
+        .btn-success:hover { 
+            background-color: #047857;
+            border-color: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+        .btn-secondary { 
+            @apply text-white;
+            background-color: #6b7280;
+            border: 1px solid #6b7280;
+        }
+        .btn-secondary:hover { 
+            background-color: #4b5563;
+            border-color: #4b5563;
+            transform: translateY(-1px);
+        }
+        .card { 
+            @apply rounded-xl p-6;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        }
+        .card:hover {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transform: translateY(-1px);
+            transition: all 0.2s ease;
+        }
+        .relationship-node { 
+            @apply inline-block px-3 py-1 rounded-full text-sm mr-2 mb-2 cursor-pointer transition-all duration-200;
+            background-color: #dbeafe;
+            color: #1e40af;
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+        .relationship-node:hover { 
+            background-color: #bfdbfe;
+            transform: translateY(-1px);
+        }
+        .project-tag { 
+            @apply inline-block px-3 py-1 rounded-full text-sm mr-2 mb-2;
+            background-color: #dcfce7;
+            color: #166534;
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+        .priority-high { 
+            background-color: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            @apply px-3 py-1 rounded-lg text-sm font-medium;
+        }
+        .priority-medium { 
+            background-color: #fffbeb;
+            border: 1px solid #fed7aa;
+            color: #d97706;
+            @apply px-3 py-1 rounded-lg text-sm font-medium;
+        }
+        .priority-low { 
+            background-color: #f9fafb;
+            border: 1px solid #d1d5db;
+            color: #6b7280;
+            @apply px-3 py-1 rounded-lg text-sm font-medium;
+        }
+        
+        /* 输入框和表单样式 */
+        input, textarea, select {
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 12px;
+            transition: all 0.2s ease;
+        }
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* 表格样式 */
+        table {
+            font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+        }
+        th {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        td {
+            color: var(--text-secondary);
+        }
     </style>
 </head>
 <body class="bg-gray-50">
