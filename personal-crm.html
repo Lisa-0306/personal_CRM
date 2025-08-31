@@ -3,12 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://www.personalcrm.info https://personalcrm.info http://localhost:3000 http://127.0.0.1:3000; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; upgrade-insecure-requests; block-all-mixed-content">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self' data: blob: https: http:; object-src 'none'; base-uri 'none'; frame-ancestors 'none'">
     <meta name="referrer" content="no-referrer">
     <title>个人CRM管理系统</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-gradient: #f5f6f7;
+            --card-bg: #ffffff;
+            --glass-blur: none;
+            --accent: #3370ff;
+        }
+        body {
+            font-family: 'Inter', 'Noto Serif SC', system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+            background: var(--bg-gradient);
+        }
+        .notion-card, .notion-table, .card {
+            background: var(--card-bg);
+            backdrop-filter: var(--glass-blur);
+        }
+        .page-title { letter-spacing: 0.02em; }
+        .page-subtitle { opacity: 0.85; }
+        .notion-btn-primary { background-color: var(--accent); border-color: var(--accent); }
+        .notion-btn-primary:hover { background-color: #2b5fe6; }
         .btn { @apply px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer; }
         .btn-primary { @apply bg-blue-600 text-white hover:bg-blue-700; }
         .btn-success { @apply bg-green-600 text-white hover:bg-green-700; }
@@ -27,19 +48,9 @@
         <div class="bg-white rounded-xl shadow-lg w-full max-w-md p-6">
             <h2 class="text-xl font-semibold text-gray-900 mb-3 text-center">登录到 Personal CRM</h2>
             <div class="flex mb-4 border rounded-lg overflow-hidden">
-                <button id="tabPhone" class="flex-1 py-2 bg-blue-50 text-blue-700" onclick="switchLoginTab('phone')">手机登录</button>
-                <button id="tabEmail" class="flex-1 py-2 text-gray-600 hover:bg-gray-50" onclick="switchLoginTab('email')">邮箱登录</button>
+                <button id="tabEmail" class="flex-1 py-2 bg-blue-50 text-blue-700" onclick="switchLoginTab('email')">邮箱登录</button>
             </div>
-            <div id="phoneLoginSection" class="space-y-3">
-                <input id="phoneInput" type="tel" class="notion-input" placeholder="请输入11位手机号（可输入 +86 138... 或 138...）" autocomplete="tel">
-                <div class="flex gap-2">
-                    <button id="sendCodeBtn" class="notion-btn notion-btn-secondary flex-1" onclick="sendPhoneCode()">获取验证码</button>
-                    <input id="codeInput" type="text" class="notion-input" placeholder="验证码" style="max-width: 10rem;">
-                </div>
-                <div id="recaptcha-container"></div>
-                <button class="notion-btn notion-btn-primary w-full" onclick="confirmPhoneCode()">登录</button>
-            </div>
-            <div id="emailLoginSection" class="space-y-3 hidden">
+            <div id="emailLoginSection" class="space-y-3">
                 <input id="emailInput" type="email" class="notion-input" placeholder="邮箱" autocomplete="email">
                 <input id="passwordInput" type="password" class="notion-input" placeholder="密码" autocomplete="current-password">
                 <div class="flex gap-2">
@@ -54,20 +65,20 @@
     <div id="appRoot" style="display:none">
         <div class="flex h-screen">
         <!-- 侧边栏 - 宽敞舒适版本 -->
-        <div class="w-80 sidebar flex flex-col">
+        <div class="w-72 sidebar flex flex-col">
             <!-- 顶部标题区域 - 更多留白 -->
-            <div class="px-8 py-10">
-                <h1 class="text-xl font-bold text-gray-900 mb-2">投资管理系统</h1>
-                <p class="text-sm text-gray-500">Personal CRM Platform</p>
+            <div class="px-6 py-8" style="text-align:center;">
+                <h1 class="text-lg font-bold text-gray-900 mb-1">个人管理系统</h1>
+                <p class="text-xs text-gray-500">Personal CRM Platform</p>
             </div>
             
             <!-- 导航区域 - 宽敞间距 -->
-            <nav class="flex-1 px-6 py-8">
-                <div class="space-y-6">
+            <nav class="flex-1 px-5 py-6">
+                <div class="space-y-5" style="row-gap: 2.5rem; align-items:stretch;">
                     <a href="#" onclick="showView('dashboard')" class="nav-item active" data-view="dashboard">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mr-5">
-                                <span class="text-xl">📊</span>
+                    <div class="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center mr-4">
+                                <span class="text-lg">📊</span>
                             </div>
                             <div>
                                 <div class="text-base font-medium text-gray-900">工作台</div>
@@ -78,8 +89,8 @@
                     
                     <a href="#" onclick="showView('contacts')" class="nav-item" data-view="contacts">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mr-5">
-                                <span class="text-xl">👥</span>
+                    <div class="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center mr-4">
+                                <span class="text-lg">👥</span>
                             </div>
                             <div>
                                 <div class="text-base font-medium text-gray-700">联系人网络</div>
@@ -88,22 +99,12 @@
                         </div>
                     </a>
                     
-                    <a href="#" onclick="showView('projects')" class="nav-item" data-view="projects">
-                        <div class="flex items-center">
-                            <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mr-5">
-                                <span class="text-xl">🎯</span>
-                            </div>
-                            <div>
-                                <div class="text-base font-medium text-gray-700">项目管理</div>
-                                <div class="text-sm text-gray-500 mt-0.5">Projects</div>
-                            </div>
-                        </div>
-                    </a>
+                    
                     
                     <a href="#" onclick="showView('opportunities')" class="nav-item" data-view="opportunities">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center mr-5">
-                                <span class="text-xl">💡</span>
+                    <div class="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center mr-4">
+                                <span class="text-lg">💡</span>
                             </div>
                             <div>
                                 <div class="text-base font-medium text-gray-700">商业机会</div>
@@ -114,8 +115,8 @@
                     
                     <a href="#" onclick="showView('schedule')" class="nav-item" data-view="schedule">
                         <div class="flex items-center">
-                            <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center mr-5">
-                                <span class="text-xl">📅</span>
+                    <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center mr-4">
+                                <span class="text-lg">📅</span>
                             </div>
                             <div>
                                 <div class="text-base font-medium text-gray-700">日程安排</div>
@@ -129,32 +130,43 @@
             <!-- 底部用户信息 - 更美观的布局 -->
             <div class="px-6 py-6 border-t border-gray-100">
                 <div class="flex items-center p-4 bg-gray-50 rounded-xl">
-                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mr-4">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mr-4" style="margin-left:auto;margin-right:auto;">
                         <span class="text-white text-lg font-medium">L</span>
                     </div>
                     <div class="flex-1">
-                        <div class="text-base font-semibold text-gray-900">Laura Zhao</div>
-                        <div class="text-sm text-gray-500">股权投资人</div>
+                        <div class="text-base font-semibold text-gray-900 text-center">Laura Zhao</div>
+                        <div class="text-sm text-gray-500 text-center">股权投资人</div>
                     </div>
-                    <div class="w-6 h-6 text-gray-400">
-                        <span class="text-lg">⚙️</span>
-                    </div>
+                    <div class="w-6 h-6 text-gray-400"></div>
                 </div>
                 <button onclick="logout()" class="notion-btn notion-btn-secondary text-xs mt-3 w-full">退出登录</button>
+                <button onclick="showView('settings')" class="notion-btn notion-btn-ghost text-xs mt-2 w-full">⚙️ 设置</button>
             </div>
         </div>
 
         <!-- 主内容区 -->
         <main class="flex-1 overflow-y-auto main-content">
             <!-- 工作台视图 -->
-            <div id="dashboard-view" class="view-content p-8">
+            <div id="dashboard-view" class="view-content" style="padding: var(--vc-pad, 2rem);">
                 <div class="mb-8">
                     <h1 class="page-title">工作台</h1>
                     <p class="page-subtitle">基于关系网络的智能工作管理</p>
                 </div>
 
+                <!-- 顶部：今日待办 与 明日提醒（放在最上方） -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-2">📝 今日待办</h3>
+                        <textarea id="todayTodos" class="w-full p-3 border border-gray-200 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y" rows="5" placeholder="输入今天的重要待办..." onblur="saveTodayTodos()"></textarea>
+                    </div>
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-2">📌 明日提醒事项</h3>
+                        <textarea id="tomorrowReminderCRM" class="w-full p-3 border border-yellow-300 rounded-lg bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-y" rows="5" placeholder="输入明天需要注意或准备的重要事项..." onblur="saveTomorrowReminderCRM()"></textarea>
+                    </div>
+                </div>
+
                 <!-- 核心数据卡片 -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-4" style="gap: var(--vc-gap, 1rem); margin-bottom: var(--vc-pad, 2rem);">
                     <div class="notion-stat-card">
                         <div class="flex items-center">
                             <div class="text-2xl mr-3">👥</div>
@@ -231,8 +243,8 @@
                 </div>
 
                 <!-- 表格视图 -->
-                <div id="contactTableView" class="notion-table">
-                    <table class="w-full">
+            <div id="contactTableView" class="notion-table">
+                <table class="w-full text-sm">
                         <thead>
                             <tr>
                                 <th class="min-w-24">姓名</th>
@@ -328,7 +340,7 @@
             </div>
 
             <!-- 商业机会视图 -->
-            <div id="opportunities-view" class="view-content hidden p-8">
+            <div id="opportunities-view" class="view-content hidden" style="padding: var(--vc-pad, 2rem);">
                 <div class="mb-8">
                     <h1 class="page-title">商业机会</h1>
                     <p class="page-subtitle">项目跟踪与合作伙伴推荐</p>
@@ -360,7 +372,7 @@
 
 
             <!-- 日程安排视图 -->
-            <div id="schedule-view" class="view-content hidden p-8">
+            <div id="schedule-view" class="view-content hidden" style="padding: var(--vc-pad, 2rem);">
                 <div class="mb-8">
                     <div class="flex justify-between items-start">
                         <div>
@@ -435,19 +447,66 @@
                     </div>
                 </div>
 
-                <!-- 明日提醒事项 -->
-                <div class="card bg-yellow-50 border-yellow-200 mt-6">
-                    <div class="flex items-center space-x-2 mb-3">
-                        <span class="text-xl">💡</span>
-                        <h3 class="text-lg font-semibold text-yellow-800">明日提醒事项</h3>
+                
+            </div>
+
+            <!-- 设置视图 -->
+            <div id="settings-view" class="view-content hidden p-8">
+                <div class="mb-6">
+                    <h1 class="page-title">设置</h1>
+                    <p class="page-subtitle">自定义界面比例与显示偏好</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-3">界面密度</h3>
+                        <select id="settingDensity" class="notion-input w-full">
+                            <option value="compact">紧凑</option>
+                            <option value="comfortable">标准</option>
+                            <option value="spacious">宽松</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">控制全局间距、卡片内边距、表格行高。</p>
                     </div>
-                    <textarea 
-                        id="tomorrowReminderCRM" 
-                        class="w-full p-3 border border-yellow-300 rounded-lg bg-yellow-50 focus:outline-none focus:ring-2 focus:ring-yellow-500 resize-none" 
-                        rows="3" 
-                        placeholder="输入明天需要注意或准备的重要事项..."
-                        onblur="saveTomorrowReminderCRM()"
-                    ></textarea>
+
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-3">字体大小</h3>
+                        <select id="settingFontScale" class="notion-input w-full">
+                            <option value="small">小</option>
+                            <option value="default">默认</option>
+                            <option value="large">大</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">调整全局基础字号，影响各模块文本。</p>
+                    </div>
+
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-3">主题风格</h3>
+                        <select id="settingTheme" class="notion-input w-full">
+                            <option value="light">浅色（清爽）</option>
+                            <option value="serif">书香（衬线）</option>
+                            <option value="ocean">海洋（蓝绿渐变）</option>
+                            <option value="night">夜色（深色）</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">改变背景、卡片玻璃效果与默认字体组合。</p>
+                    </div>
+
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-3">侧边栏宽度</h3>
+                        <select id="settingSidebarWidth" class="notion-input w-full">
+                            <option value="narrow">窄</option>
+                            <option value="default">默认</option>
+                            <option value="wide">宽</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-2">根据屏幕大小与个人喜好选择合适宽度。</p>
+                    </div>
+
+                    <div class="notion-card">
+                        <h3 class="text-base font-medium text-gray-900 mb-3">操作</h3>
+                        <div class="flex items-center space-x-2">
+                            <button class="notion-btn notion-btn-primary" onclick="saveAllSettings()">保存设置</button>
+                            <button class="notion-btn notion-btn-secondary" onclick="resetAllSettings()">恢复默认</button>
+                        </div>
+                        <p id="settingsSavedToast" class="text-xs text-green-600 mt-2 hidden">已保存</p>
+                    </div>
                 </div>
             </div>
         </main>
@@ -457,15 +516,34 @@
         // 后端API配置 - 自动选择本地或线上，可通过 window.PERSONALCRM_API_BASE 覆盖
         const API_BASE_URL = (function() {
             if (window.PERSONALCRM_API_BASE) return window.PERSONALCRM_API_BASE;
+            try {
+                const params = new URLSearchParams(location.search);
+                const override = params.get('api') || params.get('apiBase');
+                if (override) {
+                    return override.replace(/\/$/, '');
+                }
+            } catch (_) {}
             if (location.protocol === 'file:') {
-                // 本地以 file:// 打开页面时，默认指向本机后端
-                return 'http://localhost:3000/api/auth';
+                // file:// 环境下优先 127.0.0.1，避免某些环境解析 localhost 异常
+                return 'http://127.0.0.1:3000/api/auth';
             }
             const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-            if (isLocal) return 'http://localhost:3000/api/auth';
+            if (isLocal) return 'http://127.0.0.1:3000/api/auth';
             // 线上使用同源
             return `${location.origin}/api/auth`;
         })();
+        try { console.info('[PersonalCRM] API_BASE_URL =', API_BASE_URL); } catch (_) {}
+        // 数据API基址（同源 /api，可用 ?dataApi= 覆盖）
+        const DATA_API_BASE = (function() {
+            try {
+                const params = new URLSearchParams(location.search);
+                const override = params.get('dataApi') || params.get('dataAPI');
+                if (override) return override.replace(/\/$/, '');
+            } catch(_) {}
+            if (location.protocol === 'file:') return 'http://127.0.0.1:3000/api';
+            return `${location.origin}/api`;
+        })();
+        try { console.info('[PersonalCRM] DATA_API_BASE =', DATA_API_BASE); } catch (_) {}
         
         function onAuth() {
             const overlay = document.getElementById('authOverlay');
@@ -524,162 +602,14 @@
             try { return JSON.parse(raw); } catch { return null; }
         }
         function switchLoginTab(tab) {
-            const phone = document.getElementById('phoneLoginSection');
+            // 仅保留邮箱登录
             const email = document.getElementById('emailLoginSection');
-            const tabPhone = document.getElementById('tabPhone');
             const tabEmail = document.getElementById('tabEmail');
-            if (tab === 'phone') {
-                phone.classList.remove('hidden'); email.classList.add('hidden');
-                tabPhone.className = 'flex-1 py-2 bg-blue-50 text-blue-700';
-                tabEmail.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
-            } else {
-                email.classList.remove('hidden'); phone.classList.add('hidden');
-                tabEmail.className = 'flex-1 py-2 bg-blue-50 text-blue-700';
-                tabPhone.className = 'flex-1 py-2 text-gray-600 hover:bg-gray-50';
-            }
+            if (email) email.classList.remove('hidden');
+            if (tabEmail) tabEmail.className = 'flex-1 py-2 bg-blue-50 text-blue-700';
             document.getElementById('loginError').classList.add('hidden');
         }
-        // 手机登录相关函数
-        async function sendPhoneCode() {
-            const phoneRaw = document.getElementById('phoneInput').value.trim();
-            let phone = phoneRaw.replace(/[\s-]/g, '');
-            if (phone.startsWith('+86')) phone = phone.slice(3);
-            if (phone.startsWith('86') && phone.length > 11) phone = phone.slice(2);
-            const err = document.getElementById('loginError');
-            err.classList.add('hidden');
-            
-            if (!phone) { 
-                err.textContent = '请输入有效手机号'; 
-                err.classList.remove('hidden'); 
-                return; 
-            }
-            
-            // 简单的手机号格式验证
-            const phoneRegex = /^1[3-9]\d{9}$/;
-            if (!phoneRegex.test(phone)) {
-                err.textContent = '请输入正确的手机号码格式（11位数字）';
-                err.classList.remove('hidden');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/request-phone-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ phone: phone })
-                });
-                let result = {};
-                try { result = await response.json(); } catch (_) {}
-                if (response.ok && result.success) {
-                    if (result.otp) {
-                        alert(`验证码已发送：${result.otp}\n（仅用于调试，生产环境不会返回验证码）`);
-                        const codeInput = document.getElementById('codeInput');
-                        if (codeInput) codeInput.value = result.otp;
-                    } else {
-                        alert('验证码已发送。如未配置短信服务，请到后端日志查看验证码。');
-                    }
-                    // 存储手机号以便验证时使用
-                    sessionStorage.setItem('loginPhone', phone);
-                } else {
-                    err.textContent = (result && (result.message || result.error)) || `发送验证码失败 (HTTP ${response.status})`;
-                    err.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('发送验证码失败:', error);
-                // 离线应急：在本地生成并保存验证码，便于继续体验流程
-                try {
-                    const localOtp = generateLocalOTP();
-                    saveOfflineOtp(phone, localOtp);
-                    sessionStorage.setItem('loginPhone', phone);
-                    console.log(`[OFFLINE OTP] send to ${phone}: ${localOtp}`);
-                    alert('网络不可用，已启用离线验证码（本地模拟）。请在控制台查看验证码。');
-                } catch (e) {
-                    err.textContent = (error && error.message) ? `网络错误：${error.message}` : '网络错误，请稍后重试';
-                    err.classList.remove('hidden');
-                }
-            }
-        }
-        
-        async function confirmPhoneCode() {
-            const code = document.getElementById('codeInput').value.trim();
-            const phone = sessionStorage.getItem('loginPhone');
-            const err = document.getElementById('loginError');
-            err.classList.add('hidden');
-            
-            if (!code) { 
-                err.textContent = '请输入验证码'; 
-                err.classList.remove('hidden'); 
-                return; 
-            }
-            
-            if (!phone) {
-                err.textContent = '登录信息丢失，请重新获取验证码';
-                err.classList.remove('hidden');
-                return;
-            }
-            
-            try {
-                const response = await fetch(`${API_BASE_URL}/verify-phone-otp`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ phone: phone, otp: code })
-                });
-                let result = {};
-                try { result = await response.json(); } catch (_) {}
-                if (response.ok && result.success) {
-                    // 登录成功，保存用户信息和token
-                    sessionStorage.setItem('userToken', result.token);
-                    sessionStorage.setItem('userInfo', JSON.stringify(result.user));
-                    
-                    // 隐藏登录界面，显示应用
-                    const overlay = document.getElementById('authOverlay');
-                    const appRoot = document.getElementById('appRoot');
-                    overlay.classList.add('hidden');
-                    appRoot.style.display = 'block';
-                    
-                    // 清理临时数据
-                    sessionStorage.removeItem('loginPhone');
-                } else {
-                    err.textContent = (result && (result.message || result.error)) || `登录失败 (HTTP ${response.status})`;
-                    err.classList.remove('hidden');
-                }
-            } catch (error) {
-                console.error('验证码验证失败:', error);
-                // 离线应急：校验本地模拟验证码
-                try {
-                    const off = readOfflineOtp(phone);
-                    if (off && Date.now() <= off.expires && off.otp === code) {
-                        // 构造演示用 token 与用户信息
-                        const payload = {
-                            sub: `offline-${phone}`,
-                            phone,
-                            exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60
-                        };
-                        const token = createLocalDemoToken(payload);
-                        const user = { id: payload.sub, phone, email: null, loginType: 'phone' };
-
-                        sessionStorage.setItem('userToken', token);
-                        sessionStorage.setItem('userInfo', JSON.stringify(user));
-
-                        const overlay = document.getElementById('authOverlay');
-                        const appRoot = document.getElementById('appRoot');
-                        overlay.classList.add('hidden');
-                        appRoot.style.display = 'block';
-
-                        sessionStorage.removeItem(`offlineOtp_${phone}`);
-                        sessionStorage.removeItem('loginPhone');
-                        return;
-                    }
-                } catch (_) { /* ignore */ }
-
-                err.textContent = (error && error.message) ? `网络错误：${error.message}` : '网络错误，请稍后重试';
-                err.classList.remove('hidden');
-            }
-        }
+        // 已取消手机号登录相关逻辑
         // 邮箱登录函数
         async function emailSignIn() {
             const email = document.getElementById('emailInput').value.trim();
@@ -709,10 +639,10 @@
                     },
                     body: JSON.stringify({ email: email, password: password })
                 });
+                let result = {};
+                try { result = await response.json(); } catch (_) {}
                 
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
+                if (response.ok && result && result.success) {
                     // 登录成功
                     sessionStorage.setItem('userToken', result.token);
                     sessionStorage.setItem('userInfo', JSON.stringify(result.user));
@@ -722,18 +652,44 @@
                     const appRoot = document.getElementById('appRoot');
                     overlay.classList.add('hidden');
                     appRoot.style.display = 'block';
-                } else if (result.code === 'USER_NOT_FOUND') {
+                } else if (result && result.code === 'USER_NOT_FOUND') {
                     // 用户不存在，询问是否注册
                     if (confirm('该邮箱尚未注册，是否立即注册？')) {
                         await emailSignUp();
                     }
                 } else {
-                    err.textContent = result.message || '登录失败';
+                    // 在线失败，尝试离线登录
+                    try {
+                        const offline = await loginOfflineEmail(email, password);
+                        if (offline) {
+                            sessionStorage.setItem('userToken', offline.token);
+                            sessionStorage.setItem('userInfo', JSON.stringify(offline.user));
+                            const overlay = document.getElementById('authOverlay');
+                            const appRoot = document.getElementById('appRoot');
+                            overlay.classList.add('hidden');
+                            appRoot.style.display = 'block';
+                            return;
+                        }
+                    } catch (_) {}
+                    err.textContent = (result && (result.message || result.error)) || `登录失败 (HTTP ${response.status})`;
                     err.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('邮箱登录失败:', error);
-                err.textContent = '网络错误，请稍后重试';
+                // 离线兜底：尝试离线邮箱登录
+                try {
+                    const offline = await loginOfflineEmail(email, password);
+                    if (offline) {
+                        sessionStorage.setItem('userToken', offline.token);
+                        sessionStorage.setItem('userInfo', JSON.stringify(offline.user));
+                        const overlay = document.getElementById('authOverlay');
+                        const appRoot = document.getElementById('appRoot');
+                        overlay.classList.add('hidden');
+                        appRoot.style.display = 'block';
+                        return;
+                    }
+                } catch (_) {}
+                err.textContent = `网络错误：${(error && error.message) ? error.message : '请稍后重试'}`;
                 err.classList.remove('hidden');
             }
         }
@@ -765,10 +721,10 @@
                     },
                     body: JSON.stringify({ email: email, password: password })
                 });
+                let result = {};
+                try { result = await response.json(); } catch (_) {}
                 
-                const result = await response.json();
-                
-                if (response.ok && result.success) {
+                if (response.ok && result && result.success) {
                     sessionStorage.setItem('userToken', result.token);
                     sessionStorage.setItem('userInfo', JSON.stringify(result.user));
                     
@@ -780,12 +736,40 @@
                     
                     alert('注册并登录成功！');
                 } else {
-                    err.textContent = result.message || '注册失败';
+                    // 在线失败，尝试离线注册
+                    try {
+                        const offline = await registerOfflineEmail(email, password);
+                        if (offline) {
+                            sessionStorage.setItem('userToken', offline.token);
+                            sessionStorage.setItem('userInfo', JSON.stringify(offline.user));
+                            const overlay = document.getElementById('authOverlay');
+                            const appRoot = document.getElementById('appRoot');
+                            overlay.classList.add('hidden');
+                            appRoot.style.display = 'block';
+                            alert('注册并登录成功！（离线模式）');
+                            return;
+                        }
+                    } catch (_) {}
+                    err.textContent = (result && (result.message || result.error)) || `注册失败 (HTTP ${response.status})`;
                     err.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error('邮箱注册失败:', error);
-                err.textContent = '网络错误，请稍后重试';
+                // 离线兜底：完成离线邮箱注册（本地演示）
+                try {
+                    const offline = await registerOfflineEmail(email, password);
+                    if (offline) {
+                        sessionStorage.setItem('userToken', offline.token);
+                        sessionStorage.setItem('userInfo', JSON.stringify(offline.user));
+                        const overlay = document.getElementById('authOverlay');
+                        const appRoot = document.getElementById('appRoot');
+                        overlay.classList.add('hidden');
+                        appRoot.style.display = 'block';
+                        alert('注册并登录成功！（离线模式）');
+                        return;
+                    }
+                } catch (_) {}
+                err.textContent = `网络错误：${(error && error.message) ? error.message : '请稍后重试'}`;
                 err.classList.remove('hidden');
             }
         }
@@ -841,6 +825,59 @@
                 return new TextDecoder().decode(plainBuf);
             } catch (e) { return null; }
         }
+
+        // 离线邮箱用户存储（作为网络不可用时的兜底方案，仅用于本地演示）
+        function getOfflineEmailUsers() {
+            try { return JSON.parse(localStorage.getItem('offlineEmailUsers') || '{}'); } catch { return {}; }
+        }
+        function setOfflineEmailUsers(data) {
+            localStorage.setItem('offlineEmailUsers', JSON.stringify(data));
+        }
+        function isCryptoAvailable() { return !!(window.crypto && crypto.subtle && crypto.getRandomValues); }
+        function generateSaltB64() {
+            const salt = new Uint8Array(16);
+            crypto.getRandomValues(salt);
+            return abToB64(salt.buffer);
+        }
+        async function registerOfflineEmail(email, password) {
+            const users = getOfflineEmailUsers();
+            if (users[email]) throw new Error('该邮箱已存在（离线）');
+            let record = { createdAt: new Date().toISOString() };
+            if (isCryptoAvailable()) {
+                const salt = generateSaltB64();
+                const hash = await hashWithSalt(password, salt);
+                record.salt = salt;
+                record.hash = hash;
+                record.mode = 'pbkdf2-sha256';
+            } else {
+                record.hash = 'plain:' + password;
+                record.mode = 'plain';
+            }
+            users[email] = record;
+            setOfflineEmailUsers(users);
+
+            const payload = { sub: `offline-email:${email}`, email, exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 };
+            const token = createLocalDemoToken(payload);
+            const user = { id: payload.sub, email, phone: null, loginType: 'email', createdAt: record.createdAt };
+            return { token, user };
+        }
+        async function loginOfflineEmail(email, password) {
+            const users = getOfflineEmailUsers();
+            const record = users[email];
+            if (!record) return null;
+            if (record.mode === 'pbkdf2-sha256' && record.salt && record.hash) {
+                try {
+                    const calc = await hashWithSalt(password, record.salt);
+                    if (calc !== record.hash) return null;
+                } catch (_) { return null; }
+            } else if (record.mode === 'plain' && record.hash) {
+                if (record.hash !== 'plain:' + password) return null;
+            } else { return null; }
+            const payload = { sub: `offline-email:${email}`, email, exp: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60 };
+            const token = createLocalDemoToken(payload);
+            const user = { id: payload.sub, email, phone: null, loginType: 'email', createdAt: record.createdAt || new Date().toISOString() };
+            return { token, user };
+        }
         function logout() {
             // 清除用户数据
             sessionStorage.removeItem('userToken');
@@ -853,7 +890,7 @@
             if (overlay) overlay.classList.remove('hidden');
             if (appRoot) appRoot.style.display = 'none';
         }
-        function setupAuthGate() { onAuth(); switchLoginTab('phone'); }
+        function setupAuthGate() { onAuth(); switchLoginTab('email'); }
         // 示例数据
         const contacts = [
             {
@@ -958,10 +995,114 @@
                 initializeScheduleSelector();
                 toggleScheduleView('day'); // 默认显示日视图
             }
+            if (viewName === 'settings') {
+                loadSettingsUI();
+            }
         }
 
-        // 加载工作台
-        function loadDashboard() {
+        // ============ 设置：状态存取与应用 ============
+        const SETTINGS_KEY = 'ui-settings-v1';
+        function readSettings() {
+            try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); } catch { return {}; }
+        }
+        function writeSettings(s) { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); }
+        function applySettings(settings) {
+            const density = settings.density || 'spacious';
+            const fontScale = settings.fontScale || 'large';
+            const theme = settings.theme || 'ocean';
+            const sidebarWidth = settings.sidebarWidth || 'default';
+
+            // 密度影响：主视图内边距与卡片/表格行高
+            const root = document.documentElement;
+            if (density === 'compact') {
+                root.style.setProperty('--vc-pad', '1.25rem');
+                root.style.setProperty('--vc-gap', '0.5rem');
+                root.style.setProperty('--row-pad-y', '0.25rem');
+            } else if (density === 'comfortable') {
+                root.style.setProperty('--vc-pad', '1.5rem');
+                root.style.setProperty('--vc-gap', '0.75rem');
+                root.style.setProperty('--row-pad-y', '0.5rem');
+            } else { // spacious
+                root.style.setProperty('--vc-pad', '2rem');
+                root.style.setProperty('--vc-gap', '1rem');
+                root.style.setProperty('--row-pad-y', '0.75rem');
+            }
+
+            // 字体倍率
+            if (fontScale === 'small') document.body.style.fontSize = '14px';
+            else if (fontScale === 'large') document.body.style.fontSize = '16.5px';
+            else document.body.style.fontSize = '15px';
+
+            // 主题
+            if (theme === 'light') {
+                root.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #fafafa 0%, #f5f7fa 100%)');
+                root.style.setProperty('--card-bg', 'rgba(255,255,255,0.9)');
+            } else if (theme === 'serif') {
+                root.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #f8f5f0 0%, #efe9e1 100%)');
+                root.style.setProperty('--card-bg', 'rgba(255,253,250,0.85)');
+                document.body.style.fontFamily = '\'Noto Serif SC\', \'Inter\', serif';
+            } else if (theme === 'night') {
+                root.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #0f172a 0%, #111827 100%)');
+                root.style.setProperty('--card-bg', 'rgba(17,24,39,0.6)');
+                document.body.style.color = '#e5e7eb';
+            } else { // ocean
+                root.style.setProperty('--bg-gradient', 'linear-gradient(135deg, #e6f0ff 0%, #e8fbf4 100%)');
+                root.style.setProperty('--card-bg', 'rgba(255,255,255,0.75)');
+                document.body.style.fontFamily = '\'Inter\', \'Noto Serif SC\', sans-serif';
+                document.body.style.color = '';
+            }
+
+            // 侧栏宽度
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                if (sidebarWidth === 'narrow') sidebar.classList.replace('w-72', 'w-64') || sidebar.classList.replace('w-80', 'w-64');
+                else if (sidebarWidth === 'wide') sidebar.classList.replace('w-72', 'w-80') || sidebar.classList.replace('w-64', 'w-80');
+                else { // default
+                    // 回到默认 w-72
+                    sidebar.classList.remove('w-64', 'w-80');
+                    sidebar.classList.add('w-72');
+                }
+            }
+        }
+        function loadSettingsUI() {
+            const s = readSettings();
+            document.getElementById('settingDensity').value = s.density || 'spacious';
+            document.getElementById('settingFontScale').value = s.fontScale || 'large';
+            document.getElementById('settingSidebarWidth').value = s.sidebarWidth || 'default';
+            document.getElementById('settingTheme').value = s.theme || 'ocean';
+        }
+        function saveAllSettings() {
+            const s = readSettings();
+            s.density = document.getElementById('settingDensity').value;
+            s.fontScale = document.getElementById('settingFontScale').value;
+            s.theme = document.getElementById('settingTheme').value;
+            s.sidebarWidth = document.getElementById('settingSidebarWidth').value;
+            writeSettings(s);
+            applySettings(s);
+            const t = document.getElementById('settingsSavedToast');
+            if (t) { t.classList.remove('hidden'); setTimeout(()=>t.classList.add('hidden'), 1200); }
+        }
+        function resetAllSettings() {
+            localStorage.removeItem(SETTINGS_KEY);
+            applySettings({ density:'spacious', fontScale:'large', theme:'ocean', sidebarWidth:'default' });
+            loadSettingsUI();
+        }
+
+        // 加载工作台（从线上API聚合统计）
+        async function loadDashboard() {
+            try {
+                const [contactsRes, oppRes] = await Promise.all([
+                    fetch(`${DATA_API_BASE}/contacts?limit=1`).then(r=>r.json()).catch(()=>({})),
+                    fetch(`${DATA_API_BASE}/opportunities?limit=1`).then(r=>r.json()).catch(()=>({}))
+                ]);
+                const contactsCount = Array.isArray(contactsRes.contacts) ? contactsRes.contacts.length : (contactsRes.total || 0);
+                const oppCount = Array.isArray(oppRes.opportunities) ? oppRes.opportunities.length : 0;
+                const relCount = Math.max(contactsCount - 10, 0);
+                const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+                setText('totalContacts', contactsCount || 0);
+                setText('relationships', relCount || 0);
+                setText('opportunities', oppCount || 0);
+            } catch(_) {}
             loadTodayContacts();
             loadRelationshipRecommendations();
         }
@@ -1172,6 +1313,19 @@
         let selectedScheduleDate = new Date();
         let currentScheduleView = 'day'; // 'day' 或 'week'
         let currentWeekOffset = 0; // 周视图偏移量
+        // 映射：前端优先级 <-> 后端紧急程度
+        function priorityToUrgency(p) {
+            if (p === 'urgent') return 'urgent';
+            if (p === 'high') return 'high';
+            if (p === 'low') return 'low';
+            return 'medium';
+        }
+        function urgencyToPriority(u) {
+            if (u === 'urgent') return 'urgent';
+            if (u === 'high') return 'high';
+            if (u === 'low') return 'low';
+            return 'medium';
+        }
         
         // 商业机会数据
         const opportunitiesData = [
@@ -1392,11 +1546,16 @@
             document.getElementById('scheduleTimelineTitle').textContent = formatScheduleDateDisplay(selectedScheduleDate);
         }
 
-        // 加载日程时间线
-        function loadScheduleTimeline() {
+        // 加载日程时间线（线上API）
+        async function loadScheduleTimeline() {
             const container = document.getElementById('scheduleTimelineTable');
             const selectedDateStr = formatDateToString(selectedScheduleDate);
-            const daySchedules = scheduleData.filter(s => s.date === selectedDateStr);
+            let daySchedules = [];
+            try {
+                const resp = await fetch(`${DATA_API_BASE}/schedules?date=${selectedDateStr}`);
+                const data = await resp.json();
+                daySchedules = Array.isArray(data.schedules) ? data.schedules : [];
+            } catch(_) {}
             
             // 生成8:00-20:00的时间段
             const timeSlots = [];
@@ -1407,24 +1566,25 @@
             container.innerHTML = timeSlots.map(timeSlot => {
                 const hour = parseInt(timeSlot.split(':')[0]);
                 const scheduleInSlot = daySchedules.find(s => {
-                    const startHour = parseInt(s.startTime.split(':')[0]);
+                    const startHour = parseInt((s.time_slot||'00:00').split(':')[0]);
                     return startHour === hour;
                 });
                 
                 return `
                     <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                        <td class="py-3 px-3 text-sm font-medium text-gray-600 bg-gray-50">${timeSlot}</td>
-                        <td class="py-3 px-3">
+                        <td class="py-1 px-3 text-xs font-medium text-gray-600 bg-gray-50 whitespace-nowrap">${timeSlot}-${(parseInt(timeSlot.split(':')[0])+1).toString().padStart(2,'0')}:00</td>
+                        <td class="py-1 px-3">
                             <input type="text" 
-                                   value="${scheduleInSlot ? scheduleInSlot.title : ''}" 
+                                   value="${scheduleInSlot ? (scheduleInSlot.item || '') : ''}" 
                                    placeholder="点击输入事项"
-                                   class="notion-input text-sm"
+                                   class="notion-input text-lg"
+                                   style="padding-top:12px; padding-bottom:12px;"
                                    data-time="${timeSlot}" 
                                    data-field="title"
                                    onchange="updateScheduleField(this)">
                         </td>
-                        <td class="py-3 px-3">
-                            <select class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm priority-${scheduleInSlot ? scheduleInSlot.priority : 'medium'}"
+                        <td class="py-1 px-3">
+                            <select class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-lg priority-${scheduleInSlot ? urgencyToPriority(scheduleInSlot.urgency||'medium') : 'medium'}"
                                     data-time="${timeSlot}" 
                                     data-field="priority"
                                     onchange="updateScheduleField(this)">
@@ -1434,13 +1594,13 @@
                                 <option value="urgent" ${scheduleInSlot && scheduleInSlot.priority === 'urgent' ? 'selected' : ''}>紧急</option>
                             </select>
                         </td>
-                        <td class="py-3 px-3">
-                            <textarea class="w-full px-2 py-1 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-sm resize-none" 
-                                      rows="2"
-                                      placeholder="备注信息"
+                        <td class="py-1 px-3">
+                            <textarea class="w-full px-3 py-2 border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 text-lg resize-y" 
+                                      rows="4"
+                                      placeholder="备注信息（可多行）"
                                       data-time="${timeSlot}" 
                                       data-field="notes"
-                                      onchange="updateScheduleField(this)">${scheduleInSlot ? (scheduleInSlot.notes || '') : ''}</textarea>
+                                       onchange="updateScheduleField(this)">${scheduleInSlot ? (scheduleInSlot.notes || '') : ''}</textarea>
                         </td>
                     </tr>
                 `;
@@ -1450,54 +1610,60 @@
             loadTomorrowReminderCRM();
         }
 
-        // 更新日程字段
-        function updateScheduleField(element) {
+        // 更新日程字段（线上API）
+        async function updateScheduleField(element) {
             const time = element.dataset.time;
             const field = element.dataset.field;
             const value = element.value;
             const selectedDateStr = formatDateToString(selectedScheduleDate);
-            
-            if (!value.trim() && field === 'title') {
-                // 如果标题为空，删除该时间段的日程
-                const index = scheduleData.findIndex(s => s.date === selectedDateStr && s.startTime === time);
-                if (index > -1) {
-                    scheduleData.splice(index, 1);
+            try {
+                // 取当天已有数据
+                const resp = await fetch(`${DATA_API_BASE}/schedules?date=${selectedDateStr}`);
+                const data = await resp.json();
+                const daySchedules = Array.isArray(data.schedules) ? data.schedules : [];
+                const existing = daySchedules.find(s => (s.time_slot||'') === time);
+
+                if (field === 'title') {
+                    const title = (value||'').trim();
+                    if (!existing && !title) return; // 空编辑忽略
+                    if (existing && !title) {
+                        // 删除该时间段
+                        await fetch(`${DATA_API_BASE}/schedules?id=${existing.id}`, { method: 'DELETE' });
+                        await loadScheduleTimeline();
+                        return;
+                    }
+                    if (existing) {
+                        await fetch(`${DATA_API_BASE}/schedules?id=${existing.id}`, {
+                            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ item: title })
+                        });
+                    } else {
+                        await fetch(`${DATA_API_BASE}/schedules`, {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ date: selectedDateStr, time_slot: time, item: title, urgency: 'medium' })
+                        });
+                    }
+                    await loadScheduleTimeline();
+                    return;
                 }
-                return;
-            }
-            
-            if (!value.trim()) return; // 其他字段为空则不处理
-            
-            // 查找对应时间段的日程
-            let schedule = scheduleData.find(s => s.date === selectedDateStr && s.startTime === time);
-            
-            if (!schedule && field === 'title') {
-                // 如果不存在日程且输入了标题，创建新日程
-                const endHour = (parseInt(time.split(':')[0]) + 1).toString().padStart(2, '0') + ':00';
-                schedule = {
-                    id: scheduleData.length + 1,
-                    title: '',
-                    startTime: time,
-                    endTime: endHour,
-                    location: '',
-                    type: 'other',
-                    priority: 'medium',
-                    date: selectedDateStr,
-                    contactId: null,
-                    notes: ''
-                };
-                scheduleData.push(schedule);
-            }
-            
-            if (schedule) {
-                // 更新对应字段
-                schedule[field] = value;
-                
-                // 更新优先级样式
+
+                if (!existing) return; // 其他字段需已存在
                 if (field === 'priority') {
-                    element.className = element.className.replace(/priority-\w+/, `priority-${value}`);
+                    await fetch(`${DATA_API_BASE}/schedules?id=${existing.id}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ urgency: priorityToUrgency(value) })
+                    });
+                    await loadScheduleTimeline();
+                    return;
                 }
-            }
+                if (field === 'notes') {
+                    await fetch(`${DATA_API_BASE}/schedules?id=${existing.id}`, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ notes: value })
+                    });
+                    return;
+                }
+            } catch(_) {}
         }
 
         // 保存日程更改
@@ -1531,12 +1697,26 @@
             localStorage.setItem('tomorrow-reminder-crm', value);
         }
 
+        // 今日待办（明文本地存储）
+        function loadTodayTodos() {
+            const v = localStorage.getItem('today-todos') || '';
+            const el = document.getElementById('todayTodos');
+            if (el) el.value = v;
+        }
+        function saveTodayTodos() {
+            const el = document.getElementById('todayTodos');
+            if (!el) return;
+            localStorage.setItem('today-todos', el.value || '');
+        }
+
         // 初始化日程选择器
         function initializeScheduleSelector() {
             const today = new Date();
             selectedScheduleDate = today;
             document.getElementById('scheduleDateSelector').value = formatDateToString(today);
             updateScheduleTimelineTitle();
+            loadTodayTodos();
+            loadTomorrowReminderCRM();
         }
 
         // 联系人视图切换
@@ -1555,42 +1735,49 @@
             }
         }
 
-        // 加载联系人表格
-        function loadContactsTable() {
+        // 加载联系人表格（线上API）
+        async function loadContactsTable() {
             const container = document.getElementById('contactsTable');
-            
-            container.innerHTML = contacts.map((contact, index) => `
+            try {
+                const resp = await fetch(`${DATA_API_BASE}/contacts?limit=100`);
+                const data = await resp.json();
+                window.__contactsData = Array.isArray(data.contacts) ? data.contacts : [];
+            } catch(_) {
+                window.__contactsData = [];
+            }
+            const list = window.__contactsData;
+            container.innerHTML = list.map((contact, index) => `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                    <td class="py-3 px-4 font-medium text-gray-900">${contact.name}</td>
-                    <td class="py-3 px-4 text-gray-700">${contact.position}</td>
-                    <td class="py-3 px-4 text-gray-700">${contact.company}</td>
+                    <td class="py-3 px-4 font-medium text-gray-900">${contact.name || ''}</td>
+                    <td class="py-3 px-4 text-gray-700">${contact.position || ''}</td>
+                    <td class="py-3 px-4 text-gray-700">${contact.company || ''}</td>
                     <td class="py-3 px-4">
                         <div class="flex flex-wrap gap-1">
-                            ${contact.investmentPreference.map(pref => `
+                            ${(contact.investment_preference||[]).map(pref => `
                                 <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${pref}</span>
                             `).join('')}
                         </div>
                     </td>
                     <td class="py-3 px-4">
                         <span class="px-2 py-1 rounded-full text-xs ${
-                            contact.relationship === 'close' ? 'bg-green-100 text-green-800' :
-                            contact.relationship === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                            contact.relationship_level === 'close' ? 'bg-green-100 text-green-800' :
+                            contact.relationship_level === 'medium' ? 'bg-yellow-100 text-yellow-800' :
                             'bg-gray-100 text-gray-800'
                         }">
-                            ${contact.relationship === 'close' ? '密切' : 
-                              contact.relationship === 'medium' ? '一般' : '疏远'}
+                            ${(contact.relationship_level === 'close') ? '密切' : 
+                              (contact.relationship_level === 'medium') ? '一般' : '疏远'}
                         </span>
                     </td>
-                    <td class="py-3 px-4 text-gray-700">${contact.referrer}</td>
-                    <td class="py-3 px-4 text-sm text-gray-600">${contact.contactInfo}</td>
-                    <td class="py-3 px-4">
-                        <div class="flex flex-col space-y-1">
-                            <button onclick="editContact(${contact.id})" class="btn btn-secondary text-xs">编辑</button>
-                            <button onclick="contactPerson(${contact.id})" class="btn btn-primary text-xs">联系</button>
+                    <td class="py-3 px-4 text-gray-700">${contact.referred_by || ''}</td>
+                    <td class="py-3 px-4 text-sm text-gray-600">${[contact.phone, contact.email].filter(Boolean).join(', ')}</td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="inline-flex items-center space-x-2">
+                            <button onclick="editContact(${contact.id})" class="notion-btn notion-btn-secondary text-xs">编辑</button>
+                            <button onclick="removeContact(${contact.id})" class="notion-btn notion-btn-secondary text-xs">删除</button>
                         </div>
                     </td>
                 </tr>
-                ${index === contacts.length - 1 ? `
+                ${index === list.length - 1 ? `
                 <tr class="border-b border-gray-100">
                     <td colspan="8" class="py-3 px-4 text-center">
                         <button onclick="addContact()" class="btn btn-primary text-sm w-full">
@@ -1887,69 +2074,74 @@
             }
         }
 
-        // 加载商业机会表格
-        function loadOpportunities() {
+        // 加载商业机会表格（线上API）
+        async function loadOpportunities() {
             const container = document.getElementById('opportunitiesTable');
-            
-            container.innerHTML = opportunitiesData.map((opp, index) => `
+            let list = [];
+            try {
+                const resp = await fetch(`${DATA_API_BASE}/opportunities?limit=100`);
+                const data = await resp.json();
+                list = Array.isArray(data.opportunities) ? data.opportunities : [];
+            } catch(_) {}
+            container.innerHTML = list.map((opp, index) => `
                 <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td class="py-3 px-4">
-                        <input type="text" value="${opp.name}" 
+                        <input type="text" value="${opp.project_name||''}" 
                                class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               onchange="updateOpportunityField(${opp.id}, 'name', this.value)"
+                               onchange="updateOpportunityField(${opp.id}, 'project_name', this.value)"
                                placeholder="输入项目名称">
                     </td>
                     <td class="py-3 px-4">
-                        <input type="text" value="${opp.type}" 
+                        <input type="text" value="${opp.project_type||''}" 
                                class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               onchange="updateOpportunityField(${opp.id}, 'type', this.value)"
+                               onchange="updateOpportunityField(${opp.id}, 'project_type', this.value)"
                                placeholder="如：人工智能">
                     </td>
                     <td class="py-3 px-4">
                         <textarea class="w-full px-2 py-1 border border-gray-200 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" 
                                   rows="2" 
-                                  onchange="updateOpportunityField(${opp.id}, 'info', this.value)"
-                                  placeholder="项目详细信息">${opp.info}</textarea>
+                                  onchange="updateOpportunityField(${opp.id}, 'project_info', this.value)"
+                                  placeholder="项目详细信息">${opp.project_info||''}</textarea>
                     </td>
                     <td class="py-3 px-4">
-                        <input type="text" value="${opp.expectedFee}" 
+                        <input type="text" value="${opp.expected_fee||''}" 
                                class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               onchange="updateOpportunityField(${opp.id}, 'expectedFee', this.value)"
+                               onchange="updateOpportunityField(${opp.id}, 'expected_fee', this.value)"
                                placeholder="如：200万">
                     </td>
                     <td class="py-3 px-4">
-                        <input type="text" value="${opp.cooperationTarget}" 
+                        <input type="text" value="${opp.cooperation_target||''}" 
                                class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               onchange="updateOpportunityField(${opp.id}, 'cooperationTarget', this.value)"
+                               onchange="updateOpportunityField(${opp.id}, 'cooperation_target', this.value)"
                                placeholder="合作对象">
                     </td>
                     <td class="py-3 px-4">
                         <div class="flex flex-wrap gap-1">
-                            ${opp.recommendedPartners.map(partner => `
+                            ${(opp.recommended_partners||[]).map(partner => `
                                                                     <span class="notion-tag notion-tag-purple"
                                       onclick="contactRecommendedPartner('${opp.id}', '${partner}')">${partner}</span>
                             `).join('')}
-                            ${opp.recommendedPartners.length === 0 ? '<span class="text-gray-400 text-xs">系统推荐中...</span>' : ''}
+                            ${(opp.recommended_partners||[]).length === 0 ? '<span class="text-gray-400 text-xs">系统推荐中...</span>' : ''}
                         </div>
                     </td>
                     <td class="py-3 px-4">
-                        <input type="text" value="${opp.contactedPartners.join(', ')}" 
+                        <input type="text" value="${(opp.actual_partners||[]).join(', ')}" 
                                class="w-full px-2 py-1 border border-gray-200 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
-                               onchange="updateOpportunityField(${opp.id}, 'contactedPartners', this.value.split(', ').filter(p => p.trim()))"
+                               onchange="updateOpportunityField(${opp.id}, 'actual_partners', this.value.split(', ').filter(p => p.trim()))"
                                placeholder="已联系的合作伙伴">
                     </td>
                     <td class="py-3 px-4">
                         <textarea class="w-full px-2 py-1 border border-gray-200 rounded text-sm resize-none focus:outline-none focus:ring-1 focus:ring-blue-500" 
                                   rows="2" 
-                                  onchange="updateOpportunityField(${opp.id}, 'followUp', this.value)"
-                                  placeholder="跟进情况...">${opp.followUp}</textarea>
+                                  onchange="updateOpportunityField(${opp.id}, 'follow_up_status', this.value)"
+                                  placeholder="跟进情况...">${opp.follow_up_status||''}</textarea>
                     </td>
                     <td class="py-3 px-4">
                         <button onclick="deleteOpportunity(${opp.id})" class="btn btn-secondary text-xs w-full mb-1">删除</button>
                         <button onclick="generateReport(${opp.id})" class="btn btn-primary text-xs w-full">报告</button>
                     </td>
                 </tr>
-                ${index === opportunitiesData.length - 1 ? `
+                ${index === list.length - 1 ? `
                 <tr class="border-b border-gray-100">
                     <td colspan="9" class="py-3 px-4 text-center">
                         <button onclick="addNewOpportunity()" class="btn btn-primary text-sm w-full">
@@ -1962,17 +2154,13 @@
         }
 
         // 更新商业机会字段
-        function updateOpportunityField(oppId, field, value) {
-            const opp = opportunitiesData.find(o => o.id == oppId);
-            if (opp) {
-                opp[field] = value;
-                
-                // 如果更新了项目类型或轮次，重新生成推荐合作伙伴
-                if (field === 'type' || field === 'round') {
-                    generateRecommendedPartners(oppId);
-                    loadOpportunities(); // 重新加载表格
-                }
-            }
+        async function updateOpportunityField(oppId, field, value) {
+            try {
+                await fetch(`${DATA_API_BASE}/opportunities?id=${oppId}`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ [field]: value })
+                });
+            } catch(_) {}
         }
 
         // 生成推荐合作伙伴
@@ -1991,43 +2179,36 @@
         }
 
         // 添加新的商业机会
-        function addNewOpportunity() {
-            const newOpp = {
-                id: opportunitiesData.length + 1,
-                name: '',
-                type: '',
-                info: '',
-                expectedFee: '',
-                cooperationTarget: '',
-                recommendedPartners: [],
-                contactedPartners: [],
-                followUp: '',
-                status: 'pending'
-            };
-            opportunitiesData.push(newOpp);
-            loadOpportunities();
+        async function addNewOpportunity() {
+            try {
+                await fetch(`${DATA_API_BASE}/opportunities`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ project_name: '', project_type: '', project_info: '', expected_fee: '', cooperation_target: '', status: 'active' })
+                });
+                loadOpportunities();
+            } catch(_) {}
         }
 
         // 删除商业机会
-        function deleteOpportunity(oppId) {
-            if (confirm('确定要删除这个商业机会吗？')) {
-                const index = opportunitiesData.findIndex(o => o.id == oppId);
-                if (index > -1) {
-                    opportunitiesData.splice(index, 1);
-                    loadOpportunities();
-                }
-            }
+        async function deleteOpportunity(oppId) {
+            if (!confirm('是否确认删除？')) return;
+            try { await fetch(`${DATA_API_BASE}/opportunities?id=${oppId}`, { method: 'DELETE' }); } catch(_) {}
+            loadOpportunities();
         }
 
         // 联系推荐合作伙伴
-        function contactRecommendedPartner(oppId, partnerName) {
-            const opp = opportunitiesData.find(o => o.id == oppId);
-            if (opp && !opp.contactedPartners.includes(partnerName)) {
-                opp.contactedPartners.push(partnerName);
-                opp.followUp = `已联系${partnerName}，等待回复`;
+        async function contactRecommendedPartner(oppId, partnerName) {
+            try {
+                // 读取当前记录
+                const resp = await fetch(`${DATA_API_BASE}/opportunities?limit=1&offset=0`);
+                // 简化：这里直接调用更新，将 actual_partners 追加由服务端处理更稳妥
+                await fetch(`${DATA_API_BASE}/opportunities?id=${oppId}`, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ follow_up_status: `已联系${partnerName}，等待回复` })
+                });
                 loadOpportunities();
                 alert(`已标记联系${partnerName}，请及时跟进！`);
-            }
+            } catch(_) {}
         }
 
         // 更新跟进情况
@@ -2228,13 +2409,24 @@
 
         // 占位函数
         function editContact(id) { alert(`编辑联系人 ID: ${id}`); }
+        async function removeContact(id) {
+            if (!confirm('是否确认删除？')) return;
+            try {
+                await fetch(`${DATA_API_BASE}/contacts?id=${id}`, { method: 'DELETE' });
+            } catch(_) {}
+            loadContactsTable();
+        }
         function addProject() { alert('添加项目功能'); }
         function generateReport(id) { alert(`生成项目报告 ID: ${id}`); }
         function contactPerson(id) { alert(`联系联系人 ID: ${id}`); }
         function scheduleWithContact(id) { alert(`安排会议 联系人 ID: ${id}`); }
 
         // 初始化
-        document.addEventListener('DOMContentLoaded', function() { setupAuthGate(); loadDashboard(); });
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAuthGate();
+            loadDashboard();
+            try { applySettings(readSettings()); } catch(_) {}
+        });
     </script>
 
     <style>
